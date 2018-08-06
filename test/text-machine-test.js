@@ -1,5 +1,5 @@
 /*
-	Lazyness
+	Text Machine
 
 	Copyright (c) 2018 Cédric Ronvel
 
