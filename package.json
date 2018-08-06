@@ -1,0 +1,38 @@
+{
+  "name": "text-machine",
+  "version": "0.0.0",
+  "description": "A state machine for text processing.",
+  "main": "lib/TextMachine.js",
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "tea-time -R dot"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cronvel/text-machine.git"
+  },
+  "keywords": [
+    "state",
+    "machine",
+    "text"
+  ],
+  "author": "Cédric Ronvel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cronvel/text-machine/issues"
+  },
+  "copyright": {
+    "title": "Text Machine",
+    "years": [
+      2018
+    ],
+    "owner": "Cédric Ronvel"
+  }
+}
