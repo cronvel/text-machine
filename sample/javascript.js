@@ -1,7 +1,7 @@
 /*
 	Text Machine
 
-	Copyright (c) 2015 Cédric Ronvel
+	Copyright (c) 2018 - 2020 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -32,28 +32,28 @@
 
 
 
-var idleStyle = { color: 'white' } ;
-var keywordStyle = { color: 'brightWhite' , bold: true } ;
-var thisStyle = { color: 'brightRed' , bold: true } ;
-var constantKeywordStyle = { color: 'brightBlue' , bold: true } ;
-var constantStyle = { color: 'brightBlue' } ;
-var identifierStyle = { color: 'red' } ;
-var numberStyle = { color: 'cyan' } ;
-var stringStyle = { color: 'blue' } ;
-var escapeStyle = { color: 'brightCyan' , bold: true } ;
-var commentStyle = { color: 'brightBlack' } ;
-var propertyStyle = { color: 'green' } ;
-var methodStyle = { color: 'brightYellow' } ;
-var coreMethodStyle = { color: 'brightYellow' , bold: true } ;
-var classStyle = { color: 'magenta' } ;
-var coreClassOrObjectStyle = { color: 'brightMagenta' , bold: true } ;
+const idleStyle = { color: 'white' } ;
+const keywordStyle = { color: 'brightWhite' , bold: true } ;
+const thisStyle = { color: 'brightRed' , bold: true } ;
+const constantKeywordStyle = { color: 'brightBlue' , bold: true } ;
+const constantStyle = { color: 'brightBlue' } ;
+const identifierStyle = { color: 'red' } ;
+const numberStyle = { color: 'cyan' } ;
+const stringStyle = { color: 'blue' } ;
+const escapeStyle = { color: 'brightCyan' , bold: true } ;
+const commentStyle = { color: 'brightBlack' } ;
+const propertyStyle = { color: 'green' } ;
+const methodStyle = { color: 'brightYellow' } ;
+const coreMethodStyle = { color: 'brightYellow' , bold: true } ;
+const classStyle = { color: 'magenta' } ;
+const coreClassOrObjectStyle = { color: 'brightMagenta' , bold: true } ;
 
-var parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
-var braceStyle = { color: 'brightWhite' , bold: true } ;
+const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
+const braceStyle = { color: 'brightWhite' , bold: true } ;
 
 
 
-var keywords = [
+const keywords = [
 	'do' , 'if' , 'in' , 'for' , 'let' , 'new' , 'try' , 'var' , 'case' , 'else' , 'enum' ,
 	'eval' , 'void' , 'with' , 'await' , 'break' , 'catch' , 'class' , 'const' ,
 	'super' , 'throw' , 'while' , 'yield' , 'delete' , 'export' , 'import' , 'public' , 'return' ,
@@ -64,11 +64,11 @@ var keywords = [
 	'exports' , 'global' , 'module' , 'require' , '__filename' , '__dirname'
 ] ;
 
-var constantKeywords = [
+const constantKeywords = [
 	'true' , 'false' , 'null' , 'undefined' , 'Infinity' , 'NaN'
 ] ;
 
-var coreMethods = [
+const coreMethods = [
 	'setTimeout' , 'clearTimeout' , 'setInterval' , 'clearInterval' , 'setImmediate' , 'clearImmediate' ,
 	'isNaN' , 'isFinite' , 'parseInt' , 'parseFloat' ,
 
@@ -76,7 +76,7 @@ var coreMethods = [
 	'unref' , 'ref'
 ] ;
 
-var coreClassesOrObjects = [
+const coreClassesOrObjects = [
 	'Array' , 'Boolean' , 'Date' , 'Error' , 'Function' , 'Intl' , 'Math' , 'Number' , 'Object' , 'String' , 'RegExp' ,
 	'EvalError' , 'RangeError' , 'ReferenceError' , 'SyntaxError' , 'TypeError' ,
 	'ArrayBuffer' , 'Float32Array' , 'Float64Array' , 'Int16Array' , 'Int32Array' ,
@@ -92,13 +92,13 @@ var coreClassesOrObjects = [
 	'window' , 'document' , 'Window' , 'Image' , 'DataView' , 'URIError'
 ] ;
 
-var memberKeywords = [
+const memberKeywords = [
 	'prototype' , 'constructor'
 ] ;
 
 
 
-var coreMethodHints = {
+const coreMethodHints = {
 	setTimeout: 'timerID = setTimeout( callback , ms )' ,
 	clearTimeout: 'clearTimeout( timerID )' ,
 	setInterval: 'timerID = setInterval( callback , ms )' ,
@@ -110,7 +110,7 @@ var coreMethodHints = {
 
 
 
-var prog = {
+const prog = {
 	hostConfig: {	// Accessible by the host
 	} ,
 	config: {
@@ -300,7 +300,7 @@ var prog = {
 					match: true ,
 					return: 'openBrace' ,	// return (unstack), expecting returning from the 'openBrace' subProgram
 					action: [ 'openingStyle' , braceStyle ] ,
-					errorAction: [ 'style' , parseErrorStyle ] ,	// if not returning form 'openBrace', we've got a parseError
+					errorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
 					state: 'idle' ,
 					propagate: true
 				}
@@ -502,5 +502,4 @@ var prog = {
 
 
 module.exports = prog ;
-
 
