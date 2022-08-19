@@ -1,7 +1,7 @@
 /*
 	Text Machine
 
-	Copyright (c) 2018 - 2020 Cédric Ronvel
+	Copyright (c) 2018 - 2022 Cédric Ronvel
 
 	The MIT License (MIT)
 
@@ -41,6 +41,7 @@ const identifierStyle = { color: 'red' } ;
 const numberStyle = { color: 'cyan' } ;
 const stringStyle = { color: 'blue' } ;
 const escapeStyle = { color: 'brightCyan' , bold: true } ;
+const templatePlaceholderStyle = { color: 'brightCyan' , bold: true } ;
 const commentStyle = { color: 'brightBlack' } ;
 const propertyStyle = { color: 'green' } ;
 const methodStyle = { color: 'brightYellow' } ;
@@ -119,9 +120,9 @@ const prog = {
 	states: {	// Every states of the machine
 		idle: {
 			action: [ 'style' , idleStyle ] ,	// action when this state is active at the end of the event
-			buffer: false ,					// if an array, this state start buffering as long as it last
+			bufferBranches: false ,					// if an array, this state start buffering as long as it last
 			//checkpoint: true ,	// true if the past will not have influence on the future anymore: help optimizing the host
-			events: [
+			branches: [
 				{
 					match: /^[a-zA-Z_$]/ ,	// the event should match this to trigger those actions
 					state: 'identifier' ,	// next state
@@ -135,12 +136,16 @@ const prog = {
 					state: 'number'
 				} ,
 				{
+					match: "'" ,
+					state: 'singleQuoteString'
+				} ,
+				{
 					match: '"' ,
 					state: 'doubleQuoteString'
 				} ,
 				{
-					match: "'" ,
-					state: 'singleQuoteString'
+					match: '`' ,
+					state: 'templateString'
 				} ,
 				{
 					match: '/' ,
@@ -148,7 +153,7 @@ const prog = {
 				} ,
 				{
 					match: '{' ,
-					state: 'openBrace'
+					subState: 'openBrace'
 				} ,
 				{
 					match: '}' ,
@@ -156,7 +161,7 @@ const prog = {
 				} ,
 				{
 					match: '[' ,
-					state: 'openBracket'
+					subState: 'openBracket'
 				} ,
 				{
 					match: ']' ,
@@ -164,7 +169,7 @@ const prog = {
 				} ,
 				{
 					match: '(' ,
-					state: 'openParenthesis'
+					subState: 'openParenthesis'
 				} ,
 				{
 					match: ')' ,
@@ -174,7 +179,7 @@ const prog = {
 		} ,
 		identifier: {
 			action: [ 'style' , identifierStyle ] ,
-			events: [
+			branches: [
 				{
 					match: /^[a-zA-Z0-9_$]/ ,
 					state: 'identifier'
@@ -187,7 +192,7 @@ const prog = {
 				}
 			] ,
 			// Buffers are checked on state switching
-			buffer: [
+			bufferBranches: [
 				{
 					match: 'this' ,
 					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
@@ -236,7 +241,7 @@ const prog = {
 		} ,
 		number: {
 			action: [ 'style' , numberStyle ] ,
-			events: [
+			branches: [
 				{
 					match: /^[0-9.]/ ,
 					state: 'number'
@@ -253,10 +258,10 @@ const prog = {
 
 		singleQuoteString: {
 			action: [ 'style' , stringStyle ] ,
-			events: [
+			branches: [
 				{
-					match: /^\\/ ,
-					state: 'escape'
+					match: '\\' ,
+					subState: 'escape'
 				} ,
 				{
 					match: /^['\n]/ ,
@@ -267,10 +272,10 @@ const prog = {
 		} ,
 		doubleQuoteString: {
 			action: [ 'style' , stringStyle ] ,
-			events: [
+			branches: [
 				{
-					match: /^\\/ ,
-					state: 'escape'
+					match: '\\' ,
+					subState: 'escape'
 				} ,
 				{
 					match: /^["\n]/ ,
@@ -279,13 +284,47 @@ const prog = {
 				}
 			]
 		} ,
+		templateString: {
+			action: [ 'style' , stringStyle ] ,
+			branches: [
+				{
+					match: '\\' ,
+					subState: 'escape'
+				} ,
+				{
+					match: '`' ,
+					state: 'idle' ,
+					delay: true
+				} ,
+				{
+					match: '$' ,
+					state: 'templatePlaceholder'
+				}
+			]
+		} ,
+		templatePlaceholder: {
+			startSpan: true ,
+			action: [ 'style' , templatePlaceholderStyle ] ,
+			branches: [
+				{
+					match: '{' ,
+					subState: 'openBrace' ,
+					state: 'templateString'
+				} ,
+				{
+					match: true ,
+					action: [ 'spanStyle' , stringStyle ] ,
+					//clearSpan: true ,
+					state: 'templateString'
+				}
+			]
+		} ,
 
 
 
 		openBrace: {
-			subProgram: true ,		// stack a new state
 			action: [ 'style' , parseErrorStyle ] ,
-			events: [
+			branches: [
 				{
 					match: true ,
 					state: 'idle' ,
@@ -295,11 +334,11 @@ const prog = {
 		} ,
 		closeBrace: {
 			action: [ 'style' , braceStyle ] ,
-			events: [
+			branches: [
 				{
 					match: true ,
-					return: 'openBrace' ,	// return (unstack), expecting returning from the 'openBrace' subProgram
-					action: [ 'openingStyle' , braceStyle ] ,
+					return: 'openBrace' ,	// return (unstack), expecting returning from the 'openBrace' subState
+					action: [ 'startingStyle' , braceStyle ] ,
 					errorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
 					state: 'idle' ,
 					propagate: true
@@ -307,9 +346,8 @@ const prog = {
 			]
 		} ,
 		openBracket: {
-			subProgram: true ,
 			action: [ 'style' , parseErrorStyle ] ,
-			events: [
+			branches: [
 				{
 					match: true ,
 					state: 'idle' ,
@@ -319,11 +357,11 @@ const prog = {
 		} ,
 		closeBracket: {
 			action: [ 'style' , braceStyle ] ,
-			events: [
+			branches: [
 				{
 					match: true ,
 					return: 'openBracket' ,
-					action: [ 'openingStyle' , braceStyle ] ,
+					action: [ 'startingStyle' , braceStyle ] ,
 					errorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
@@ -331,9 +369,8 @@ const prog = {
 			]
 		} ,
 		openParenthesis: {
-			subProgram: true ,
 			action: [ 'style' , parseErrorStyle ] ,
-			events: [
+			branches: [
 				{
 					match: true ,
 					state: 'idle' ,
@@ -343,11 +380,11 @@ const prog = {
 		} ,
 		closeParenthesis: {
 			action: [ 'style' , braceStyle ] ,
-			events: [
+			branches: [
 				{
 					match: true ,
 					return: 'openParenthesis' ,
-					action: [ 'openingStyle' , braceStyle ] ,
+					action: [ 'startingStyle' , braceStyle ] ,
 					errorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
@@ -359,7 +396,7 @@ const prog = {
 
 		afterIdentifier: {
 			action: [ 'style' , idleStyle ] ,
-			events: [
+			branches: [
 				{
 					match: ' ' ,
 					state: 'afterIdentifier'
@@ -370,7 +407,7 @@ const prog = {
 				} ,
 				{
 					match: '(' ,
-					state: 'openParenthesis' ,
+					subState: 'openParenthesis' ,
 					action: [ 'blockStyle' , methodStyle ]
 				} ,
 				{
@@ -382,7 +419,7 @@ const prog = {
 		} ,
 		dotAfterIdentifier: {
 			action: [ 'style' , idleStyle ] ,
-			events: [
+			branches: [
 				{
 					match: ' ' ,
 					state: 'dotAfterIdentifier'
@@ -400,7 +437,7 @@ const prog = {
 		} ,
 		member: {
 			action: [ 'style' , propertyStyle ] ,
-			events: [
+			branches: [
 				{
 					match: /^[a-zA-Z0-9_$]/ ,
 					state: 'member'
@@ -413,7 +450,7 @@ const prog = {
 				}
 			] ,
 			// Checked when an event would change the state
-			buffer: [
+			bufferBranches: [
 				{
 					match: memberKeywords ,
 					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
@@ -428,7 +465,7 @@ const prog = {
 
 		idleSlash: {
 			action: [ 'style' , idleStyle ] ,
-			events: [
+			branches: [
 				{
 					match: '/' ,
 					state: 'lineComment' ,
@@ -447,7 +484,7 @@ const prog = {
 		} ,
 		lineComment: {
 			action: [ 'style' , commentStyle ] ,
-			events: [
+			branches: [
 				{
 					match: '\n' ,
 					state: 'idle'
@@ -456,7 +493,7 @@ const prog = {
 		} ,
 		multiLineComment: {
 			action: [ 'style' , commentStyle ] ,
-			events: [
+			branches: [
 				{
 					match: '*' ,
 					state: 'multiLineCommentAsterisk'
@@ -465,7 +502,7 @@ const prog = {
 		} ,
 		multiLineCommentAsterisk: {
 			action: [ 'style' , commentStyle ] ,
-			events: [
+			branches: [
 				{
 					match: '/' ,
 					state: 'idle' ,
@@ -485,9 +522,8 @@ const prog = {
 
 
 		escape: {
-			subProgram: true ,
 			action: [ 'style' , escapeStyle ] ,
-			events: [
+			branches: [
 				{
 					match: true ,
 					return: true ,

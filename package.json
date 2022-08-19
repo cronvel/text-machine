@@ -4,7 +4,7 @@
   "description": "A state machine for text processing.",
   "main": "lib/TextMachine.js",
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=14.15.0"
   },
   "directories": {
     "test": "test"
@@ -32,7 +32,7 @@
     "title": "Text Machine",
     "years": [
       2018,
-      2020
+      2022
     ],
     "owner": "Cédric Ronvel"
   }
