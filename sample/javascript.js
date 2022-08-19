@@ -196,43 +196,43 @@ const prog = {
 				{
 					match: 'this' ,
 					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
-					action: [ 'blockStyle' , thisStyle ] ,
+					action: [ 'streakStyle' , thisStyle ] ,
 					state: 'afterIdentifier'
 					//propagate: true ,
 					//continue: true
 				} ,
 				{
 					match: keywords ,
-					action: [ 'blockStyle' , keywordStyle ] ,
+					action: [ 'streakStyle' , keywordStyle ] ,
 					state: 'idle'
 				} ,
 				{
 					match: constantKeywords ,
-					action: [ 'blockStyle' , constantKeywordStyle ] ,
+					action: [ 'streakStyle' , constantKeywordStyle ] ,
 					state: 'idle'
 				} ,
 				{
 					match: coreMethods ,
-					action: [ [ 'blockStyle' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
+					action: [ [ 'streakStyle' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
 					state: 'idle'
 				} ,
 				{
 					match: coreClassesOrObjects ,
-					action: [ 'blockStyle' , coreClassOrObjectStyle ] ,
+					action: [ 'streakStyle' , coreClassOrObjectStyle ] ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
 					continue: true
 				} ,
 				{
 					match: /^[A-Z][A-Z0-9_]+$/ ,
-					action: [ 'blockStyle' , constantStyle ] ,
+					action: [ 'streakStyle' , constantStyle ] ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
 					continue: true
 				} ,
 				{
 					match: /^[A-Z]/ ,
-					action: [ 'blockStyle' , classStyle ] ,
+					action: [ 'streakStyle' , classStyle ] ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
 					continue: true
@@ -338,7 +338,7 @@ const prog = {
 				{
 					match: true ,
 					return: 'openBrace' ,	// return (unstack), expecting returning from the 'openBrace' subState
-					action: [ 'startingStyle' , braceStyle ] ,
+					action: [ 'starterStyle' , braceStyle ] ,
 					errorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
 					state: 'idle' ,
 					propagate: true
@@ -361,7 +361,7 @@ const prog = {
 				{
 					match: true ,
 					return: 'openBracket' ,
-					action: [ 'startingStyle' , braceStyle ] ,
+					action: [ 'starterStyle' , braceStyle ] ,
 					errorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
@@ -384,7 +384,7 @@ const prog = {
 				{
 					match: true ,
 					return: 'openParenthesis' ,
-					action: [ 'startingStyle' , braceStyle ] ,
+					action: [ 'starterStyle' , braceStyle ] ,
 					errorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
@@ -408,7 +408,7 @@ const prog = {
 				{
 					match: '(' ,
 					subState: 'openParenthesis' ,
-					action: [ 'blockStyle' , methodStyle ]
+					action: [ 'streakStyle' , methodStyle ]
 				} ,
 				{
 					match: true ,
@@ -454,7 +454,7 @@ const prog = {
 				{
 					match: memberKeywords ,
 					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
-					action: [ 'blockStyle' , keywordStyle ] ,
+					action: [ 'streakStyle' , keywordStyle ] ,
 					state: 'afterIdentifier' ,
 					propagate: true
 				}
