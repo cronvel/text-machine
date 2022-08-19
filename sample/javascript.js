@@ -339,7 +339,7 @@ const prog = {
 					match: true ,
 					return: 'openBrace' ,	// return (unstack), expecting returning from the 'openBrace' subState
 					action: [ 'starterStyle' , braceStyle ] ,
-					errorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
+					returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
 					state: 'idle' ,
 					propagate: true
 				}
@@ -362,7 +362,7 @@ const prog = {
 					match: true ,
 					return: 'openBracket' ,
 					action: [ 'starterStyle' , braceStyle ] ,
-					errorAction: [ 'style' , parseErrorStyle ] ,
+					returnErrorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -385,7 +385,7 @@ const prog = {
 					match: true ,
 					return: 'openParenthesis' ,
 					action: [ 'starterStyle' , braceStyle ] ,
-					errorAction: [ 'style' , parseErrorStyle ] ,
+					returnErrorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
 				}
