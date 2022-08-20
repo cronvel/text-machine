@@ -42,13 +42,21 @@ const numberStyle = { color: 'cyan' } ;
 const stringStyle = { color: 'blue' } ;
 const escapeStyle = { color: 'brightCyan' , bold: true } ;
 const templatePlaceholderStyle = { color: 'brightCyan' , bold: true } ;
-const regexpStyle = { color: 'blue' } ;
 const commentStyle = { color: 'brightBlack' } ;
 const propertyStyle = { color: 'green' } ;
 const methodStyle = { color: 'brightYellow' } ;
 const coreMethodStyle = { color: 'brightYellow' , bold: true } ;
 const classStyle = { color: 'magenta' } ;
 const coreClassOrObjectStyle = { color: 'brightMagenta' , bold: true } ;
+
+const regexpStyle = { color: 'blue' } ;
+const regexpDelemiterStyle = { color: 'brightMagenta' , bold: true } ;
+const regexpParenthesisStyle = { color: 'yellow' , bold: true } ;
+const regexpBracketStyle = { color: 'brightMagenta' , bold: true } ;
+const regexpAlternativeStyle = { color: 'yellow' , bold: true } ;
+const regexpMarkupStyle = { color: 'brightMagenta' } ;
+const regexpClassStyle = { color: 'magenta' } ;
+const regexpFlagStyle = { color: 'brightCyan' } ;
 
 const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
 const braceStyle = { color: 'brightWhite' , bold: true } ;
@@ -180,56 +188,21 @@ const prog = {
 		} ,
 		// In the middle of an expression, after any constant/value/identifier/function call/etc...
 		// Mostly like idle, except that slash can be divide sign instead of RegExp
-		idleExpression: {
+		idleAfterValue: {
 			action: [ 'style' , idleStyle ] ,	// action when this state is active at the end of the event
 			branches: [
 				{
-					match: /^[a-zA-Z_$]/ ,	// the event should match this to trigger those actions
-					state: 'identifier' ,	// next state
-				} ,
-				{
-					match: /^[0-9]/ ,
-					state: 'number'
-				} ,
-				{
-					match: "'" ,
-					state: 'singleQuoteString'
-				} ,
-				{
-					match: '"' ,
-					state: 'doubleQuoteString'
-				} ,
-				{
-					match: '`' ,
-					state: 'templateString'
-				} ,
-				{
 					match: '/' ,
-					state: 'idleExpressionSlash'
+					state: 'idleAfterValueSlash'
 				} ,
 				{
-					match: '{' ,
-					subState: 'openBrace'
+					match: ' ' ,
+					state: 'idleAfterValue'
 				} ,
 				{
-					match: '}' ,
-					state: 'closeBrace'
-				} ,
-				{
-					match: '[' ,
-					subState: 'openBracket'
-				} ,
-				{
-					match: ']' ,
-					state: 'closeBracket'
-				} ,
-				{
-					match: '(' ,
-					subState: 'openParenthesis'
-				} ,
-				{
-					match: ')' ,
-					state: 'closeParenthesis'
+					match: true ,
+					state: 'idle' ,
+					propagate: true
 				}
 			]
 		} ,
@@ -242,7 +215,7 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					state: 'idle' ,
+					state: 'idleAfterValue' ,
 					propagate: true
 				}
 			]
@@ -281,7 +254,7 @@ const prog = {
 					match: constantKeywords ,
 					//action: [ 'streakStyle' , constantKeywordStyle ] ,
 					action: [ 'spanStyle' , 'identifier' , constantKeywordStyle ] ,
-					state: 'idle'
+					state: 'idleAfterValue'
 				} ,
 				{
 					match: coreMethods ,
@@ -324,13 +297,18 @@ const prog = {
 					state: 'dotAfterIdentifier'
 				} ,
 				{
+					match: ':' ,
+					state: 'idle' ,
+					action: [ 'spanStyle' , 'identifier' , propertyStyle ]
+				} ,
+				{
 					match: '(' ,
 					subState: 'openParenthesis' ,
 					action: [ 'spanStyle' , 'identifier' , methodStyle ]
 				} ,
 				{
 					match: true ,
-					state: 'idle' ,
+					state: 'idleAfterValue' ,
 					propagate: true
 				}
 			]
@@ -394,7 +372,7 @@ const prog = {
 				} ,
 				{
 					match: /^['\n]/ ,
-					state: 'idle' ,
+					state: 'idleAfterValue' ,
 					delay: true
 				}
 			]
@@ -408,7 +386,7 @@ const prog = {
 				} ,
 				{
 					match: /^["\n]/ ,
-					state: 'idle' ,
+					state: 'idleAfterValue' ,
 					delay: true
 				}
 			]
@@ -422,7 +400,7 @@ const prog = {
 				} ,
 				{
 					match: '`' ,
-					state: 'idle' ,
+					state: 'idleAfterValue' ,
 					delay: true
 				} ,
 				{
@@ -456,24 +434,127 @@ const prog = {
 					subState: 'escape'
 				} ,
 				{
+					match: /[.?+*^$]/ ,
+					state: 'regexpMarkup'
+				} ,
+				{
+					match: '[' ,
+					state: 'regexpOpenBracket'
+				} ,
+				{
+					match: '(' ,
+					subState: 'regexpOpenParenthesis'
+				} ,
+				{
+					match: ')' ,
+					state: 'regexpCloseParenthesis'
+				} ,
+				{
+					match: '|' ,
+					state: 'regexpAlternative'
+				} ,
+				{
 					match: '/' ,
+					state: 'closeRegexp'
+				}
+			]
+		} ,
+		closeRegexp: {
+			action: [ 'style' , regexpDelemiterStyle ] ,
+			branches: [
+				{
+					match: true ,
 					state: 'regexpFlag' ,
-					delay: true
+					propagate: true
 				}
 			]
 		} ,
 		regexpFlag: {
-			action: [ 'style' , regexpStyle ] ,
+			action: [ 'style' , regexpFlagStyle ] ,
 			branches: [
 				{
 					match: /[a-z]/ ,
-					state: 'regexpFlag' ,
-					delay: true
+					state: 'regexpFlag'
 				} ,
 				{
 					match: true ,
-					state: 'idle' ,
-					delay: true
+					state: 'idleAfterValue' ,
+					propagate: true
+				}
+			]
+		} ,
+		regexpMarkup: {
+			action: [ 'style' , regexpMarkupStyle ] ,
+			branches: [
+				{
+					match: true ,
+					state: 'regexp' ,
+					propagate: true
+				}
+			]
+		} ,
+		regexpAlternative: {
+			action: [ 'style' , regexpAlternativeStyle ] ,
+			branches: [
+				{
+					match: true ,
+					state: 'regexp' ,
+					propagate: true
+				}
+			]
+		} ,
+		regexpOpenParenthesis: {
+			action: [ 'style' , parseErrorStyle ] ,
+			branches: [
+				{
+					match: true ,
+					state: 'regexp' ,
+					propagate: true
+				}
+			]
+		} ,
+		regexpCloseParenthesis: {
+			returnAfter: 'regexpOpenParenthesis' ,
+			action: [ [ 'style' , regexpParenthesisStyle ] , [ 'openerStyle' , regexpParenthesisStyle ] ] ,
+			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
+			branches: [
+				{
+					match: true ,
+					state: 'regexp' ,
+					propagate: true
+				}
+			]
+		} ,
+		regexpOpenBracket: {
+			action: [ 'style' , regexpBracketStyle ] ,
+			branches: [
+				{
+					match: true ,
+					state: 'regexpClass' ,
+					propagate: true
+				}
+			]
+		} ,
+		regexpClass: {
+			action: [ 'style' , regexpClassStyle ] ,
+			branches: [
+				{
+					match: '\\' ,
+					subState: 'escape'
+				} ,
+				{
+					match: ']' ,
+					state: 'regexpCloseBracket'
+				}
+			]
+		} ,
+		regexpCloseBracket: {
+			action: [ 'style' , regexpBracketStyle ] ,
+			branches: [
+				{
+					match: true ,
+					state: 'regexp' ,
+					propagate: true
 				}
 			]
 		} ,
@@ -565,12 +646,11 @@ const prog = {
 				{
 					match: true ,
 					state: 'regexp' ,
-					action: [ 'streakStyle' , regexpStyle ] ,
-					propagate: true
+					action: [ 'streakStyle' , regexpDelemiterStyle ]
 				}
 			]
 		} ,
-		idleExpressionSlash: {
+		idleAfterValueSlash: {
 			action: [ 'style' , idleStyle ] ,
 			branches: [
 				{
