@@ -42,6 +42,7 @@ const numberStyle = { color: 'cyan' } ;
 const stringStyle = { color: 'blue' } ;
 const escapeStyle = { color: 'brightCyan' , bold: true } ;
 const templatePlaceholderStyle = { color: 'brightCyan' , bold: true } ;
+const regexpStyle = { color: 'blue' } ;
 const commentStyle = { color: 'brightBlack' } ;
 const propertyStyle = { color: 'green' } ;
 const methodStyle = { color: 'brightYellow' } ;
@@ -150,6 +151,61 @@ const prog = {
 				{
 					match: '/' ,
 					state: 'idleSlash'
+				} ,
+				{
+					match: '{' ,
+					subState: 'openBrace'
+				} ,
+				{
+					match: '}' ,
+					state: 'closeBrace'
+				} ,
+				{
+					match: '[' ,
+					subState: 'openBracket'
+				} ,
+				{
+					match: ']' ,
+					state: 'closeBracket'
+				} ,
+				{
+					match: '(' ,
+					subState: 'openParenthesis'
+				} ,
+				{
+					match: ')' ,
+					state: 'closeParenthesis'
+				}
+			]
+		} ,
+		// In the middle of an expression, after any constant/value/identifier/function call/etc...
+		// Mostly like idle, except that slash can be divide sign instead of RegExp
+		idleExpression: {
+			action: [ 'style' , idleStyle ] ,	// action when this state is active at the end of the event
+			branches: [
+				{
+					match: /^[a-zA-Z_$]/ ,	// the event should match this to trigger those actions
+					state: 'identifier' ,	// next state
+				} ,
+				{
+					match: /^[0-9]/ ,
+					state: 'number'
+				} ,
+				{
+					match: "'" ,
+					state: 'singleQuoteString'
+				} ,
+				{
+					match: '"' ,
+					state: 'doubleQuoteString'
+				} ,
+				{
+					match: '`' ,
+					state: 'templateString'
+				} ,
+				{
+					match: '/' ,
+					state: 'idleExpressionSlash'
 				} ,
 				{
 					match: '{' ,
@@ -392,6 +448,35 @@ const prog = {
 				}
 			]
 		} ,
+		regexp: {
+			action: [ 'style' , regexpStyle ] ,
+			branches: [
+				{
+					match: '\\' ,
+					subState: 'escape'
+				} ,
+				{
+					match: '/' ,
+					state: 'regexpFlag' ,
+					delay: true
+				}
+			]
+		} ,
+		regexpFlag: {
+			action: [ 'style' , regexpStyle ] ,
+			branches: [
+				{
+					match: /[a-z]/ ,
+					state: 'regexpFlag' ,
+					delay: true
+				} ,
+				{
+					match: true ,
+					state: 'idle' ,
+					delay: true
+				}
+			]
+		} ,
 
 
 
@@ -470,12 +555,33 @@ const prog = {
 				{
 					match: '/' ,
 					state: 'lineComment' ,
-					action: [ 'style' , commentStyle ]
+					action: [ 'streakStyle' , commentStyle ]
 				} ,
 				{
 					match: '*' ,
 					state: 'multiLineComment' ,
-					action: [ 'style' , commentStyle ]
+					action: [ 'streakStyle' , commentStyle ]
+				} ,
+				{
+					match: true ,
+					state: 'regexp' ,
+					action: [ 'streakStyle' , regexpStyle ] ,
+					propagate: true
+				}
+			]
+		} ,
+		idleExpressionSlash: {
+			action: [ 'style' , idleStyle ] ,
+			branches: [
+				{
+					match: '/' ,
+					state: 'lineComment' ,
+					action: [ 'streakStyle' , commentStyle ]
+				} ,
+				{
+					match: '*' ,
+					state: 'multiLineComment' ,
+					action: [ 'streakStyle' , commentStyle ]
 				} ,
 				{
 					match: true ,
