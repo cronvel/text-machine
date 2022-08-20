@@ -333,7 +333,10 @@ const prog = {
 			]
 		} ,
 		closeBrace: {
-			action: [ 'style' , braceStyle ] ,
+			returnAfter: 'openBrace' ,
+			action: [ [ 'style' , braceStyle ] , [ 'starterStyle' , braceStyle ] ] ,
+			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
+			/*
 			branches: [
 				{
 					match: true ,
@@ -344,6 +347,7 @@ const prog = {
 					propagate: true
 				}
 			]
+			*/
 		} ,
 		openBracket: {
 			action: [ 'style' , parseErrorStyle ] ,
