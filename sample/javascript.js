@@ -177,68 +177,6 @@ const prog = {
 				}
 			]
 		} ,
-		identifier: {
-			action: [ 'style' , identifierStyle ] ,
-			branches: [
-				{
-					match: /^[a-zA-Z0-9_$]/ ,
-					state: 'identifier'
-				} ,
-				{
-					match: true ,
-					state: 'afterIdentifier' ,
-					propagate: true ,
-					continue: true		// Keep the starting context
-				}
-			] ,
-			// Buffers are checked on state switching
-			bufferBranches: [
-				{
-					match: 'this' ,
-					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
-					action: [ 'streakStyle' , thisStyle ] ,
-					state: 'afterIdentifier'
-					//propagate: true ,
-					//continue: true
-				} ,
-				{
-					match: keywords ,
-					action: [ 'streakStyle' , keywordStyle ] ,
-					state: 'idle'
-				} ,
-				{
-					match: constantKeywords ,
-					action: [ 'streakStyle' , constantKeywordStyle ] ,
-					state: 'idle'
-				} ,
-				{
-					match: coreMethods ,
-					action: [ [ 'streakStyle' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
-					state: 'idle'
-				} ,
-				{
-					match: coreClassesOrObjects ,
-					action: [ 'streakStyle' , coreClassOrObjectStyle ] ,
-					state: 'afterIdentifier' ,
-					propagate: true ,
-					continue: true
-				} ,
-				{
-					match: /^[A-Z][A-Z0-9_]+$/ ,
-					action: [ 'streakStyle' , constantStyle ] ,
-					state: 'afterIdentifier' ,
-					propagate: true ,
-					continue: true
-				} ,
-				{
-					match: /^[A-Z]/ ,
-					action: [ 'streakStyle' , classStyle ] ,
-					state: 'afterIdentifier' ,
-					propagate: true ,
-					continue: true
-				}
-			]
-		} ,
 		number: {
 			action: [ 'style' , numberStyle ] ,
 			branches: [
@@ -253,6 +191,141 @@ const prog = {
 				}
 			]
 		} ,
+		identifier: {
+			action: [ 'style' , identifierStyle ] ,
+			span: 'identifier' ,
+			branches: [
+				{
+					match: /^[a-zA-Z0-9_$]/ ,
+					state: 'identifier'
+				} ,
+				{
+					match: true ,
+					state: 'afterIdentifier' ,
+					propagate: true ,
+				}
+			] ,
+			// Buffers are checked on state switching
+			bufferBranches: [
+				{
+					match: 'this' ,
+					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
+					//action: [ 'streakStyle' , thisStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , thisStyle ] ,
+					state: 'afterIdentifier'
+					//propagate: true ,
+				} ,
+				{
+					match: keywords ,
+					//action: [ 'streakStyle' , keywordStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
+					state: 'idle'
+				} ,
+				{
+					match: constantKeywords ,
+					//action: [ 'streakStyle' , constantKeywordStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , constantKeywordStyle ] ,
+					state: 'idle'
+				} ,
+				{
+					match: coreMethods ,
+					//action: [ [ 'streakStyle' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
+					action: [ [ 'spanStyle' , 'identifier' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
+					state: 'idle'
+				} ,
+				{
+					match: coreClassesOrObjects ,
+					//action: [ 'streakStyle' , coreClassOrObjectStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , coreClassOrObjectStyle ] ,
+					state: 'afterIdentifier' ,
+					propagate: true ,
+				} ,
+				{
+					match: /^[A-Z][A-Z0-9_]+$/ ,
+					//action: [ 'streakStyle' , constantStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , constantStyle ] ,
+					state: 'afterIdentifier' ,
+					propagate: true ,
+				} ,
+				{
+					match: /^[A-Z]/ ,
+					//action: [ 'streakStyle' , classStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , classStyle ] ,
+					state: 'afterIdentifier' ,
+					propagate: true ,
+				}
+			]
+		} ,
+		afterIdentifier: {
+			action: [ 'style' , idleStyle ] ,
+			branches: [
+				{
+					match: ' ' ,
+					state: 'afterIdentifier'
+				} ,
+				{
+					match: '.' ,
+					state: 'dotAfterIdentifier'
+				} ,
+				{
+					match: '(' ,
+					subState: 'openParenthesis' ,
+					action: [ 'spanStyle' , 'identifier' , methodStyle ]
+				} ,
+				{
+					match: true ,
+					state: 'idle' ,
+					propagate: true
+				}
+			]
+		} ,
+		dotAfterIdentifier: {
+			action: [ 'style' , idleStyle ] ,
+			branches: [
+				{
+					match: ' ' ,
+					state: 'dotAfterIdentifier'
+				} ,
+				{
+					match: /^[a-zA-Z_$]/ ,
+					state: 'member'
+				} ,
+				{
+					match: true ,
+					state: 'idle' ,
+					propagate: true
+				}
+			]
+		} ,
+		member: {
+			action: [ 'style' , propertyStyle ] ,
+			span: 'identifier' ,
+			branches: [
+				{
+					match: /^[a-zA-Z0-9_$]/ ,
+					state: 'member'
+				} ,
+				{
+					match: true ,
+					state: 'afterIdentifier' ,
+					propagate: true ,
+				}
+			] ,
+			// Checked when an event would change the state
+			bufferBranches: [
+				{
+					match: memberKeywords ,
+					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
+					//action: [ 'streakStyle' , keywordStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
+					state: 'afterIdentifier' ,
+					propagate: true
+				}
+			]
+		} ,
+
+
+
 
 
 
@@ -384,75 +457,6 @@ const prog = {
 				{
 					match: true ,
 					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-
-
-
-		afterIdentifier: {
-			action: [ 'style' , idleStyle ] ,
-			branches: [
-				{
-					match: ' ' ,
-					state: 'afterIdentifier'
-				} ,
-				{
-					match: '.' ,
-					state: 'dotAfterIdentifier'
-				} ,
-				{
-					match: '(' ,
-					subState: 'openParenthesis' ,
-					action: [ 'streakStyle' , methodStyle ]
-				} ,
-				{
-					match: true ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-		dotAfterIdentifier: {
-			action: [ 'style' , idleStyle ] ,
-			branches: [
-				{
-					match: ' ' ,
-					state: 'dotAfterIdentifier'
-				} ,
-				{
-					match: /^[a-zA-Z_$]/ ,
-					state: 'member'
-				} ,
-				{
-					match: true ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-		member: {
-			action: [ 'style' , propertyStyle ] ,
-			branches: [
-				{
-					match: /^[a-zA-Z0-9_$]/ ,
-					state: 'member'
-				} ,
-				{
-					match: true ,
-					state: 'afterIdentifier' ,
-					propagate: true ,
-					continue: true		// continue the block
-				}
-			] ,
-			// Checked when an event would change the state
-			bufferBranches: [
-				{
-					match: memberKeywords ,
-					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
-					action: [ 'streakStyle' , keywordStyle ] ,
-					state: 'afterIdentifier' ,
 					propagate: true
 				}
 			]
