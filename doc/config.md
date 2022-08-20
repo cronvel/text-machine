@@ -3,6 +3,13 @@
 
 * action: `Array` with the action name and its arguments, OR an array of that (if multiple actions should be issued).
   State's actions are applied upon entering a state, but after the branching action
+* returnErrorAction: `Array` with the action name and its arguments, OR an array of that (if multiple actions should be issued).
+  If returning on an incorrect state, use thoses actions instead of regular state's actions.
+  Used for parse error styling (e.g. parse error when a closing parenthesis/bracket/brace/etc does not match an opening one).
+* returnAfter: `true` or `string` if set it returns to the parent-state automatically *after*, i.e. on the next event-character,
+  if a string is provided the parent-state's name should match that string, or it will be considered as a parse error,
+  and will use the *returnErrorAction* property instead of the *action* property.
+  It's mostly the same than branch's *return* property, except that *returnErrorAction* trigger immediately if it should.
 * branches: `Array` of branch object (see branch properties below).
   The first branch that match is selected.
 * bufferBranches: like `branches`, but match a buffer instead of the event-character.
@@ -38,4 +45,7 @@
 * endSpan:
 * clearSpan:
 * continue: DEPRECATED
+
+MAYBE:
+* overide: `boolean` if set, the branch's action replace the next state's action once
 

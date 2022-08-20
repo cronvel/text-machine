@@ -334,20 +334,15 @@ const prog = {
 		} ,
 		closeBrace: {
 			returnAfter: 'openBrace' ,
-			action: [ [ 'style' , braceStyle ] , [ 'starterStyle' , braceStyle ] ] ,
+			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
 			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
-			/*
 			branches: [
 				{
 					match: true ,
-					return: 'openBrace' ,	// return (unstack), expecting returning from the 'openBrace' subState
-					action: [ 'starterStyle' , braceStyle ] ,
-					returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
 					state: 'idle' ,
 					propagate: true
 				}
 			]
-			*/
 		} ,
 		openBracket: {
 			action: [ 'style' , parseErrorStyle ] ,
@@ -360,13 +355,12 @@ const prog = {
 			]
 		} ,
 		closeBracket: {
-			action: [ 'style' , braceStyle ] ,
+			returnAfter: 'openBracket' ,
+			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
+			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
 			branches: [
 				{
 					match: true ,
-					return: 'openBracket' ,
-					action: [ 'starterStyle' , braceStyle ] ,
-					returnErrorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -383,13 +377,12 @@ const prog = {
 			]
 		} ,
 		closeParenthesis: {
-			action: [ 'style' , braceStyle ] ,
+			returnAfter: 'openParenthesis' ,
+			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
+			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
 			branches: [
 				{
 					match: true ,
-					return: 'openParenthesis' ,
-					action: [ 'starterStyle' , braceStyle ] ,
-					returnErrorAction: [ 'style' , parseErrorStyle ] ,
 					state: 'idle' ,
 					propagate: true
 				}
