@@ -34,6 +34,8 @@
 
 const idleStyle = { color: 'white' } ;
 const keywordStyle = { color: 'brightWhite' , bold: true } ;
+const operatorStyle = { color: 'brightWhite' , bold: true } ;
+const assignmentStyle = { color: 'brightWhite' , bold: true } ;
 const thisStyle = { color: 'brightRed' , bold: true } ;
 const constantKeywordStyle = { color: 'brightBlue' , bold: true } ;
 const constantStyle = { color: 'brightBlue' } ;
@@ -64,18 +66,40 @@ const braceStyle = { color: 'brightWhite' , bold: true } ;
 
 
 const keywords = [
-	'do' , 'if' , 'in' , 'for' , 'let' , 'new' , 'try' , 'var' , 'case' , 'else' , 'enum' ,
-	'eval' , 'void' , 'with' , 'await' , 'break' , 'catch' , 'class' , 'const' ,
-	'super' , 'throw' , 'while' , 'yield' , 'delete' , 'export' , 'import' , 'public' , 'return' ,
-	'static' , 'switch' , 'typeof' , 'default' , 'extends' , 'finally' , 'package' , 'private' ,
-	'continue' , 'debugger' , 'function' , 'arguments' , 'interface' , 'protected' , 'implements' , 'instanceof' ,
+	'var' , 'let' , 'const' ,
+	'do' , 'while' , 'for' , 'in' , 'of' , 'switch' , 'case' , 'default' , 'break' , 'continue' ,
+	'if' , 'else' ,
+	'function' , 'arguments' , 'async' , 'await' , 'return' , 'yield' ,
+	'throw' , 'try' , 'catch' , 'finally' ,
+	'new' , 'class' , 'extends' , 'static' , 'public' , 'protected' , 'private' , 'implements' , 'interface' , 'super' ,
+	
+	'typeof' , 'instanceof' ,
+	'delete' ,
+	'enum' , 'eval' , 'void' , 'with' , 
+	
+	'export' , 'import' , 'package' , 
+	'debugger' ,
+] ;
 
-	// Node pseudo keywords
-	'exports' , 'global' , 'module' , 'require' , '__filename' , '__dirname'
+const operators = [
+	'+' , '++' , '-' , '--' , '*' , '**' , '%' , // '/'
+	'&&' , '||' , '!' , '!!' ,
+	'==' , '===' , '!=' , '!==' , '<' , '<=' , '>' , '>=' ,
+	'&' , '|' , '^' , '<<' , '>>' , '>>>' ,
+	'??'
+] ;
+
+const assignments = [
+	'=' ,
+	'+=' , '-=' , '*=' , '%=' , // '/='
+	'&=' , '|=' , '^='
 ] ;
 
 const constantKeywords = [
-	'true' , 'false' , 'null' , 'undefined' , 'Infinity' , 'NaN'
+	'true' , 'false' , 'null' , 'undefined' , 'Infinity' , 'NaN' ,
+
+	// Node pseudo-constant
+	'__filename' , '__dirname'
 ] ;
 
 const coreMethods = [
@@ -83,7 +107,7 @@ const coreMethods = [
 	'isNaN' , 'isFinite' , 'parseInt' , 'parseFloat' ,
 
 	// Node
-	'unref' , 'ref'
+	'unref' , 'ref' , 'require'
 ] ;
 
 const coreClassesOrObjects = [
@@ -96,13 +120,14 @@ const coreClassesOrObjects = [
 	'console' , 'JSON' ,
 
 	// Node
+	'exports' , 'global' , 'module' ,
 	'process' , 'Buffer' ,
 
 	// Browser
 	'window' , 'document' , 'Window' , 'Image' , 'DataView' , 'URIError'
 ] ;
 
-const memberKeywords = [
+const specialMember = [
 	'prototype' , 'constructor'
 ] ;
 
@@ -126,19 +151,17 @@ const prog = {
 	config: {
 		initState: 'idle'
 	} ,
-	states: {	// Every states of the machine
+	states: {
 		idle: {
-			action: [ 'style' , idleStyle ] ,	// action when this state is active at the end of the event
-			bufferBranches: false ,					// if an array, this state start buffering as long as it last
-			//checkpoint: true ,	// true if the past will not have influence on the future anymore: help optimizing the host
+			action: [ 'style' , idleStyle ] ,
 			branches: [
 				{
-					match: /^[a-zA-Z_$]/ ,	// the event should match this to trigger those actions
-					state: 'identifier' ,	// next state
-
-					propagate: false ,		// eat the event or propagate it immediately to the next state?
-					action: null ,			// action at trigger time, run before the action of the next state
-					delay: false 			// for this time, the old state action will be executed rather than the new one
+					match: /^[a-zA-Z_$]/ ,
+					state: 'identifier'
+				} ,
+				{
+					match: /^[=.<>^?!&|~*%+-]/ ,
+					state: 'operator'
 				} ,
 				{
 					match: /^[0-9]/ ,
@@ -183,6 +206,10 @@ const prog = {
 				{
 					match: ')' ,
 					state: 'closeParenthesis'
+				} ,
+				{
+					match: ':' ,
+					state: 'colon' ,
 				}
 			]
 		} ,
@@ -234,54 +261,48 @@ const prog = {
 					propagate: true ,
 				}
 			] ,
-			// Buffers are checked on state switching
 			bufferBranches: [
 				{
 					match: 'this' ,
-					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
-					//action: [ 'streakStyle' , thisStyle ] ,
 					action: [ 'spanStyle' , 'identifier' , thisStyle ] ,
-					state: 'afterIdentifier'
-					//propagate: true ,
+					state: 'afterIdentifier' ,
+					propagate: true
 				} ,
 				{
 					match: keywords ,
-					//action: [ 'streakStyle' , keywordStyle ] ,
 					action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
-					state: 'idle'
+					state: 'idle' ,
+					propagate: true
 				} ,
 				{
 					match: constantKeywords ,
-					//action: [ 'streakStyle' , constantKeywordStyle ] ,
 					action: [ 'spanStyle' , 'identifier' , constantKeywordStyle ] ,
-					state: 'idleAfterValue'
+					state: 'idleAfterValue' ,
+					propagate: true
 				} ,
 				{
 					match: coreMethods ,
-					//action: [ [ 'streakStyle' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
 					action: [ [ 'spanStyle' , 'identifier' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
-					state: 'idle'
+					state: 'idle' ,
+					propagate: true
 				} ,
 				{
 					match: coreClassesOrObjects ,
-					//action: [ 'streakStyle' , coreClassOrObjectStyle ] ,
 					action: [ 'spanStyle' , 'identifier' , coreClassOrObjectStyle ] ,
 					state: 'afterIdentifier' ,
-					propagate: true ,
+					propagate: true
 				} ,
 				{
 					match: /^[A-Z][A-Z0-9_]+$/ ,
-					//action: [ 'streakStyle' , constantStyle ] ,
 					action: [ 'spanStyle' , 'identifier' , constantStyle ] ,
 					state: 'afterIdentifier' ,
-					propagate: true ,
+					propagate: true
 				} ,
 				{
 					match: /^[A-Z]/ ,
-					//action: [ 'streakStyle' , classStyle ] ,
 					action: [ 'spanStyle' , 'identifier' , classStyle ] ,
 					state: 'afterIdentifier' ,
-					propagate: true ,
+					propagate: true
 				}
 			]
 		} ,
@@ -298,8 +319,13 @@ const prog = {
 				} ,
 				{
 					match: ':' ,
-					state: 'idle' ,
-					action: [ 'spanStyle' , 'identifier' , propertyStyle ]
+					hasMicroState: 'ternary' ,
+					state: 'colon'
+				} ,
+				{
+					match: ':' ,
+					action: [ 'spanStyle' , 'identifier' , propertyStyle ] ,
+					state: 'colon'
 				} ,
 				{
 					match: '(' ,
@@ -345,14 +371,61 @@ const prog = {
 					propagate: true ,
 				}
 			] ,
-			// Checked when an event would change the state
 			bufferBranches: [
 				{
-					match: memberKeywords ,
-					// replace the 'action' of the event, also work with any properties of the event except 'match' BTW
-					//action: [ 'streakStyle' , keywordStyle ] ,
+					match: specialMember ,
 					action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
 					state: 'afterIdentifier' ,
+					propagate: true
+				}
+			]
+		} ,
+
+
+
+		operator: {
+			action: [ 'style' , idleStyle ] ,
+			span: 'operator' ,
+			branches: [
+				{
+					match: /^[=.<>^?!&|~*%+-]/ ,
+					state: 'operator'
+				} ,
+				{
+					match: true ,
+					state: 'idle' ,
+					propagate: true ,
+				}
+			] ,
+			bufferBranches: [
+				{
+					match: '?' ,
+					action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
+					state: 'idle' ,
+					microState: { ternary: true } ,
+					propagate: true
+				} ,
+				{
+					match: operators ,
+					action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
+					state: 'idle' ,
+					propagate: true
+				} ,
+				{
+					match: assignments ,
+					action: [ 'spanStyle' , 'operator' , assignmentStyle ] ,
+					state: 'idle' ,
+					propagate: true
+				}
+			]
+		} ,
+		colon: {
+			action: [ 'style' , operatorStyle ] ,
+			microState: { ternary: false } ,
+			branches: [
+				{
+					match: true ,
+					state: 'idle' ,
 					propagate: true
 				}
 			]
@@ -563,6 +636,7 @@ const prog = {
 
 		openBrace: {
 			action: [ 'style' , parseErrorStyle ] ,
+			//microState: { keyValuePair: true } ,
 			branches: [
 				{
 					match: true ,

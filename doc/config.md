@@ -14,9 +14,11 @@
   The first branch that match is selected.
 * bufferBranches: like `branches`, but match a buffer instead of the event-character.
   **Only checked/matched on state switching**.
+  If matched, its *program* replaces the matching branch.
 * span: `string` start or continue a span with the identified by the given name.
   For a span to continue, it must be contiguous.
   *Spans* define areas that can be styled with the *spanStyle* action.
+* microState: `object` set/unset some micro-states, key: micro-state name, value: boolean (true: set, false: unset).
 
 
 
@@ -28,6 +30,9 @@
 	* array: match if one of its element match
 	* regexp: match if the regexp match
 	* function: a userland function used for matching
+* hasMicroState: `string` or `Array` of `string`, if set to a micro-state's name, the branch will only match if the current state
+  has this micro-state turned on, if it's an array, all micro-states specified should be turned on.
+* microState: `object` set/unset some micro-states, key: micro-state name, value: boolean (true: set, false: unset).
 * action: `Array` with the action name and its arguments, OR an array of that (if multiple actions should be issued).
   Branch's actions are applied before entering the new state (before the new state action)
 * returnErrorAction: `Array` with the action name and its arguments, OR an array of that (if multiple actions should be issued).
