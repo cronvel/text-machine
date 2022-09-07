@@ -720,6 +720,7 @@ const prog = {
 				{
 					match: true ,
 					state: 'regexp' ,
+					propagate: true ,
 					action: [ 'streakStyle' , regexpDelemiterStyle ]
 				}
 			]
