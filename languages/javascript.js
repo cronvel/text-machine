@@ -117,7 +117,7 @@ const coreClassesOrObjects = [
 	'Int8Array' , 'Uint16Array' , 'Uint32Array' , 'Uint8Array' ,
 
 	// Common
-	'console' , 'JSON' ,
+	'console' , 'JSON' , 'Promise' ,
 
 	// Node
 	'exports' , 'global' , 'module' ,
