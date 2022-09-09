@@ -257,6 +257,7 @@ const prog = {
 				} ,
 				{
 					match: true ,
+					store: 'autoCompletion' ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
 				}
@@ -283,24 +284,28 @@ const prog = {
 				{
 					match: coreMethods ,
 					action: [ [ 'spanStyle' , 'identifier' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
+					store: 'autoCompletion' ,
 					state: 'idle' ,
 					propagate: true
 				} ,
 				{
 					match: coreClassesOrObjects ,
 					action: [ 'spanStyle' , 'identifier' , coreClassOrObjectStyle ] ,
+					store: 'autoCompletion' ,
 					state: 'afterIdentifier' ,
 					propagate: true
 				} ,
 				{
 					match: /^[A-Z][A-Z0-9_]+$/ ,
 					action: [ 'spanStyle' , 'identifier' , constantStyle ] ,
+					store: 'autoCompletion' ,
 					state: 'afterIdentifier' ,
 					propagate: true
 				} ,
 				{
 					match: /^[A-Z]/ ,
 					action: [ 'spanStyle' , 'identifier' , classStyle ] ,
+					store: 'autoCompletion' ,
 					state: 'afterIdentifier' ,
 					propagate: true
 				}
@@ -367,6 +372,7 @@ const prog = {
 				} ,
 				{
 					match: true ,
+					store: 'autoCompletion' ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
 				}

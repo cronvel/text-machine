@@ -35,6 +35,8 @@
 * microState: `object` set/unset some micro-states, key: micro-state name, value: boolean (true: set, false: unset).
 * action: `Array` with the action name and its arguments, OR an array of that (if multiple actions should be issued).
   Branch's actions are applied before entering the new state (before the new state action)
+* store: `string` (store's name) or `Array` of `string` (list of store's names): store the current buffer into the store,
+  a store being a Javascript `Set`, and is used by the host program for things like populating auto-completion, or whatever.
 * returnErrorAction: `Array` with the action name and its arguments, OR an array of that (if multiple actions should be issued).
   If returning on an incorrect state, use thoses actions instead of regular branch's actions.
   Used for parse error styling (e.g. parse error when a closing parenthesis/bracket/brace/etc does not match an opening one).
