@@ -49,6 +49,7 @@ const propertyStyle = { color: 'green' } ;
 const methodStyle = { color: 'brightYellow' } ;
 const coreMethodStyle = { color: 'brightYellow' , bold: true } ;
 const classStyle = { color: 'magenta' } ;
+const constructorStyle = { color: 'magenta' } ;
 const coreClassOrObjectStyle = { color: 'brightMagenta' , bold: true } ;
 
 const regexpStyle = { color: 'blue' } ;
@@ -57,8 +58,9 @@ const regexpParenthesisStyle = { color: 'yellow' , bold: true } ;
 const regexpBracketStyle = { color: 'brightMagenta' , bold: true } ;
 const regexpAlternativeStyle = { color: 'yellow' , bold: true } ;
 const regexpMarkupStyle = { color: 'brightMagenta' } ;
-const regexpClassStyle = { color: 'magenta' } ;
-const regexpFlagStyle = { color: 'brightCyan' } ;
+const regexpClassStyle = { color: 'cyan' } ;
+const regexpClassRangeStyle = { color: 'magenta' } ;
+const regexpFlagStyle = { color: 'green' } ;
 
 const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
 const braceStyle = { color: 'brightWhite' , bold: true } ;
@@ -306,7 +308,7 @@ const prog = {
 					match: /^[A-Z]/ ,
 					action: [ 'spanStyle' , 'identifier' , classStyle ] ,
 					store: 'autoCompletion' ,
-					state: 'afterIdentifier' ,
+					state: 'afterClass' ,
 					propagate: true
 				}
 			]
@@ -340,6 +342,26 @@ const prog = {
 				{
 					match: true ,
 					state: 'idleAfterValue' ,
+					propagate: true
+				}
+			]
+		} ,
+		afterClass: {
+			action: [ 'style' , idleStyle ] ,
+			branches: [
+				{
+					match: ' ' ,
+					state: 'afterClass'
+				} ,
+				{
+					match: '(' ,
+					subState: 'openParenthesis' ,
+					action: [ 'spanStyle' , 'identifier' , constructorStyle ]
+				} ,
+				{
+					// Fallback to other afterIdentifier branches
+					match: true ,
+					state: 'afterIdentifier' ,
 					propagate: true
 				}
 			]
@@ -622,8 +644,26 @@ const prog = {
 					subState: 'escape'
 				} ,
 				{
+					match: '-' ,
+					state: 'regexpMaybeClassRange'
+				} ,
+				{
 					match: ']' ,
 					state: 'regexpCloseBracket'
+				}
+			]
+		} ,
+		regexpMaybeClassRange: {
+			action: [ 'style' , regexpClassStyle ] ,
+			branches: [
+				{
+					match: ']' ,
+					state: 'regexpCloseBracket'
+				} ,
+				{
+					match: true ,
+					action: [ 'starterStyle' , regexpClassRangeStyle ] ,
+					state: 'regexpClass'
 				}
 			]
 		} ,

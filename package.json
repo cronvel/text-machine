@@ -1,6 +1,6 @@
 {
   "name": "text-machine",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A state machine for text processing.",
   "main": "lib/TextMachine.js",
   "engines": {
