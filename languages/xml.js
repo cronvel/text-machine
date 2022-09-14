@@ -170,12 +170,30 @@ const prog = {
 					state: 'endTag'
 				} ,
 				{
+					match: '/' ,
+					state: 'maybeSelfClosingTag'
+				} ,
+				{
 					match: /[ \t\n]/ ,
 					state: 'attributesPart'
 				} ,
 				{
 					match: true ,
 					state: 'tagError'
+				}
+			]
+		} ,
+		maybeSelfClosingTag: {
+			action: [ 'style' , tagStyle ] ,
+			branches: [
+				{
+					match: '>' ,
+					state: 'endTag'
+				} ,
+				{
+					match: true ,
+					state: 'attributesPart' ,
+					propagate: true
 				}
 			]
 		} ,
@@ -190,6 +208,10 @@ const prog = {
 				{
 					match: '>' ,
 					state: 'endTag'
+				} ,
+				{
+					match: '/' ,
+					state: 'maybeSelfClosingTag'
 				}
 			]
 		} ,
@@ -203,6 +225,10 @@ const prog = {
 				{
 					match: '>' ,
 					state: 'endTag'
+				} ,
+				{
+					match: '/' ,
+					state: 'maybeSelfClosingTag'
 				} ,
 				{
 					match: '=' ,
@@ -230,6 +256,10 @@ const prog = {
 				{
 					match: '>' ,
 					state: 'endTag'
+				} ,
+				{
+					match: '/' ,
+					state: 'maybeSelfClosingTag'
 				}
 			]
 		} ,
