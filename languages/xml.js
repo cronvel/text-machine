@@ -134,6 +134,7 @@ const prog = {
 		} ,
 		openTag: {
 			action: [ 'style' , tagStyle ] ,
+			microState: { openTag: false } ,
 			branches: [
 				{
 					match: '>' ,
@@ -151,6 +152,15 @@ const prog = {
 			branches: [
 				{
 					match: true ,
+					subState: 'openTagContent' ,
+					propagate: true
+				}
+			]
+		} ,
+		openTagContent: {
+			branches: [
+				{
+					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -158,11 +168,23 @@ const prog = {
 		} ,
 		openTagName: {
 			action: [ 'style' , tagNameStyle ] ,
+			buffer: true ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_-]/ ,
 					state: 'openTagName'
 				} ,
+				{
+					match: true ,
+					state: 'afterOpenTagName' ,
+					microState: { openTag: [ 'buffer' ] } ,
+					propagate: true
+				}
+			]
+		} ,
+		afterOpenTagName: {
+			action: [ 'style' , tagNameStyle ] ,
+			branches: [
 				{
 					match: '>' ,
 					state: 'endOpenTag'
@@ -179,15 +201,7 @@ const prog = {
 					match: true ,
 					state: 'openTagError'
 				}
-			] ,
-			/*
-			bufferBranches: [
-				{
-					match: true ,
-					storeInMicroState: 'openTag'
-				}
 			]
-			*/
 		} ,
 		maybeSelfClosingTag: {
 			action: [ 'style' , tagStyle ] ,
@@ -299,6 +313,22 @@ const prog = {
 		} ,
 		closeTagName: {
 			action: [ 'style' , tagNameStyle ] ,
+			buffer: true ,
+			branches: [
+				{
+					match: /[a-zA-Z0-9_-]/ ,
+					state: 'closeTagName'
+				} ,
+				{
+					match: true ,
+					state: 'afterCloseTagName' ,
+					microState: { closeTag: [ 'buffer' ] } ,
+					propagate: true
+				}
+			]
+		} ,
+		afterCloseTagName: {
+			action: [ 'style' , tagNameStyle ] ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_-]/ ,
@@ -315,7 +345,11 @@ const prog = {
 			]
 		} ,
 		endCloseTag: {
+			returnAfter: 'openTagContent' ,
+			returnToMicroState: { openTag: [ 'microState' , 'closeTag' ] } ,
 			action: [ 'style' , tagStyle ] ,
+			//action: [ [ 'style' , tagStyle ] , [ 'openerStyle' , openTagStyle ] ] ,
+            returnErrorAction: [ 'style' , parseErrorStyle ] ,  // if not returning from 'endOpenTag', we've got a parseError
 			branches: [
 				{
 					match: true ,

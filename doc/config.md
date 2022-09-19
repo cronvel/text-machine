@@ -15,6 +15,8 @@
 * bufferBranches: like `branches`, but match a buffer instead of the event-character.
   **Only checked/matched on state switching**.
   If matched, its *program* replaces the matching branch.
+  Force `buffer=true`.
+* buffer: `boolean` if set, start accumulating into a buffer until the state-change
 * span: `string` start or continue a span with the identified by the given name.
   For a span to continue, it must be contiguous.
   *Spans* define areas that can be styled with the *spanStyle* action.
@@ -52,6 +54,7 @@
 * propagate: `boolean` if set, the event-character is issued again after the state have changed,
   i.e. the matching character is not eaten is re-used by the new state
 * delay: `boolean` if set, the action of the state before branching will be used this time, instead of those of the new state
+* preserveBuffer: `boolean` if set, the buffer is preserved across the state-change
 
 MAYBE:
 * overide: `boolean` if set, the branch's action replace the next state's action once
