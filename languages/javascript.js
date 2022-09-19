@@ -682,7 +682,6 @@ const prog = {
 
 		openBrace: {
 			action: [ 'style' , parseErrorStyle ] ,
-			//microState: { keyValuePair: true } ,
 			branches: [
 				{
 					match: true ,

@@ -18,7 +18,8 @@
 * span: `string` start or continue a span with the identified by the given name.
   For a span to continue, it must be contiguous.
   *Spans* define areas that can be styled with the *spanStyle* action.
-* microState: `object` set/unset some micro-states, key: micro-state name, value: boolean (true: set, false: unset).
+* microState: `object` set/unset some micro-states, key: micro-state name, value: `boolean` or `number` or `string` (true/number/string: set, false: unset).
+* storeInMicroState: `string` store the current buffer into that micro-state
 
 
 
@@ -30,9 +31,11 @@
 	* array: match if one of its element match
 	* regexp: match if the regexp match
 	* function: a userland function used for matching
-* hasMicroState: `string` or `Array` of `string`, if set to a micro-state's name, the branch will only match if the current state
-  has this micro-state turned on, if it's an array, all micro-states specified should be turned on.
-* microState: `object` set/unset some micro-states, key: micro-state name, value: boolean (true: set, false: unset).
+* hasMicroState: `string` or `object` or `Array` of `string`, if set to a micro-state's name, the branch will only match if the current state
+  has this micro-state turned on, if it's an array, all micro-states specified should be turned on, if it's an object, all micro-states specified as the *key*
+  must have matching *values*.
+* microState: `object` set/unset some micro-states, key: micro-state name, value: `boolean` or `number` or `string` (true/number/string: set, false: unset).
+* storeInMicroState: `string` store the current buffer into that micro-state
 * action: `Array` with the action name and its arguments, OR an array of that (if multiple actions should be issued).
   Branch's actions are applied before entering the new state (before the new state action)
 * store: `string` (store's name) or `Array` of `string` (list of store's names): store the current buffer into the store,

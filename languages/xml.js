@@ -114,6 +114,18 @@ const prog = {
 					state: 'closeTag'
 				} ,
 				{
+					// Definition: <? ... ?>
+					match: '?' ,
+					state: 'maybeDeclaration'
+				} ,
+				{
+					// Could be a comments <!-- ... -->
+					// Could be a <!DOCTYPE html> or <!ENTITY ... >
+					// Could be a <![CDATA[ ... ]]>
+					match: '!' ,
+					state: 'maybeComment'
+				} ,
+				{
 					match: true ,
 					state: 'openTag' ,
 					propagate: true
@@ -125,30 +137,16 @@ const prog = {
 			branches: [
 				{
 					match: '>' ,
-					state: 'endTag'
+					state: 'endOpenTag'
 				} ,
 				{
 					match: true ,
-					state: 'tagName' ,
+					state: 'openTagName' ,
 					propagate: true
 				}
 			]
 		} ,
-		closeTag: {
-			action: [ 'style' , tagStyle ] ,
-			branches: [
-				{
-					match: '>' ,
-					state: 'endTag'
-				} ,
-				{
-					match: true ,
-					state: 'tagName' ,
-					propagate: true
-				}
-			]
-		} ,
-		endTag: {
+		endOpenTag: {
 			action: [ 'style' , tagStyle ] ,
 			branches: [
 				{
@@ -158,16 +156,16 @@ const prog = {
 				}
 			]
 		} ,
-		tagName: {
+		openTagName: {
 			action: [ 'style' , tagNameStyle ] ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_-]/ ,
-					state: 'tagName'
+					state: 'openTagName'
 				} ,
 				{
 					match: '>' ,
-					state: 'endTag'
+					state: 'endOpenTag'
 				} ,
 				{
 					match: '/' ,
@@ -179,16 +177,24 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					state: 'tagError'
+					state: 'openTagError'
+				}
+			] ,
+			/*
+			bufferBranches: [
+				{
+					match: true ,
+					storeInMicroState: 'openTag'
 				}
 			]
+			*/
 		} ,
 		maybeSelfClosingTag: {
 			action: [ 'style' , tagStyle ] ,
 			branches: [
 				{
 					match: '>' ,
-					state: 'endTag'
+					state: 'endOpenTag'
 				} ,
 				{
 					match: true ,
@@ -207,7 +213,7 @@ const prog = {
 				} ,
 				{
 					match: '>' ,
-					state: 'endTag'
+					state: 'endOpenTag'
 				} ,
 				{
 					match: '/' ,
@@ -224,7 +230,7 @@ const prog = {
 				} ,
 				{
 					match: '>' ,
-					state: 'endTag'
+					state: 'endOpenTag'
 				} ,
 				{
 					match: '/' ,
@@ -255,7 +261,7 @@ const prog = {
 				} ,
 				{
 					match: '>' ,
-					state: 'endTag'
+					state: 'endOpenTag'
 				} ,
 				{
 					match: '/' ,
@@ -263,15 +269,72 @@ const prog = {
 				}
 			]
 		} ,
-		tagError: {
+		openTagError: {
 			action: [ 'style' , parseErrorStyle ] ,
 			branches: [
 				{
 					match: '>' ,
-					state: 'endTag'
+					state: 'endOpenTag'
 				}
 			]
 		} ,
+
+
+
+
+
+		closeTag: {
+			action: [ 'style' , tagStyle ] ,
+			branches: [
+				{
+					match: '>' ,
+					state: 'endCloseTag'
+				} ,
+				{
+					match: true ,
+					state: 'closeTagName' ,
+					propagate: true
+				}
+			]
+		} ,
+		closeTagName: {
+			action: [ 'style' , tagNameStyle ] ,
+			branches: [
+				{
+					match: /[a-zA-Z0-9_-]/ ,
+					state: 'closeTagName'
+				} ,
+				{
+					match: '>' ,
+					state: 'endCloseTag'
+				} ,
+				{
+					match: true ,
+					state: 'closeTagError'
+				}
+			]
+		} ,
+		endCloseTag: {
+			action: [ 'style' , tagStyle ] ,
+			branches: [
+				{
+					match: true ,
+					state: 'idle' ,
+					propagate: true
+				}
+			]
+		} ,
+		closeTagError: {
+			action: [ 'style' , parseErrorStyle ] ,
+			branches: [
+				{
+					match: '>' ,
+					state: 'endCloseTag'
+				}
+			]
+		} ,
+
+
 
 
 
