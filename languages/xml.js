@@ -48,7 +48,7 @@ const entityStyle = { color: 'cyan' } ;
 const stringStyle = { color: 'blue' } ;
 const escapeStyle = { color: 'brightCyan' , bold: true } ;
 
-const commentStyle = { color: 'brightBlack' } ;
+const commentStyle = { color: 'gray' } ;
 const propertyStyle = { color: 'green' } ;
 
 const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
@@ -150,27 +150,6 @@ const prog = {
 				}
 			]
 		} ,
-		endOpenTag: {
-			action: [ 'style' , tagStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: true ,
-					subState: 'openTagContent' ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-		openTagContent: {
-			branches: [
-				{
-					match: true ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
 		openTagName: {
 			action: [ 'style' , tagNameStyle ] ,
 			span: 'tagName' ,
@@ -216,11 +195,43 @@ const prog = {
 			branches: [
 				{
 					match: '>' ,
-					state: 'endOpenTag'
+					state: 'endSelfClosingTag'
 				} ,
 				{
 					match: true ,
 					state: 'openTagAttributesPart' ,
+					propagate: true
+				}
+			]
+		} ,
+		endSelfClosingTag: {
+			action: [ 'style' , tagStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: true ,
+					state: 'idle' ,
+					propagate: true
+				}
+			]
+		} ,
+		endOpenTag: {
+			action: [ 'style' , tagStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: true ,
+					subState: 'openTagContent' ,
+					state: 'idle' ,
+					propagate: true
+				}
+			]
+		} ,
+		openTagContent: {
+			branches: [
+				{
+					match: true ,
+					state: 'idle' ,
 					propagate: true
 				}
 			]
@@ -528,6 +539,54 @@ const prog = {
 		} ,
 
 
+		maybeComment: {
+			action: [ 'style' , tagStyle ] ,
+			span: 'tag' ,
+			branches: [
+				{
+					// Could be a comments <!-- ... -->
+					match: '-' ,
+					state: 'maybeComment2'
+				} ,
+				{
+					// Could be a <![CDATA[ ... ]]>
+					match: '[' ,
+					state: 'maybeCDATA'
+				} ,
+				{
+					// Could be a <!DOCTYPE html> or <!ENTITY ... >
+					match: /[a-zA-Z0-9_-]/ ,
+					state: 'definitionTagName' ,
+					propagate: true
+				} ,
+				{
+					match: true ,
+					state: 'openTag' ,
+					propagate: true
+				}
+			]
+		} ,
+		maybeComment2: {
+			action: [ 'style' , tagStyle ] ,
+			span: 'tag' ,
+			branches: [
+				{
+					match: '-' ,
+					action: [ 'spanStyle' , 'tag' , commentStyle ] ,
+					state: 'comment' ,
+				}
+			]
+		} ,
+		comment: {
+			action: [ 'style' , commentStyle ] ,
+			span: 'tag' ,
+			branches: [
+				{
+					match: '-' ,
+					state: 'maybeEndComment'
+				} ,
+			]
+		} ,
 
 
 
