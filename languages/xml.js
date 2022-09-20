@@ -35,9 +35,13 @@
 const idleStyle = { color: 'white' } ;
 const operatorStyle = { color: 'brightWhite' , bold: true } ;
 
+const declarationTagStyle = { color: 'brightMagenta' } ;
+const declarationTagNameStyle = { color: 'magenta' } ;
+const declarationTagAttributeNameStyle = { color: 'magenta' } ;
+
 const tagStyle = { color: 'brightYellow' } ;
 const tagNameStyle = { color: 'yellow' } ;
-const attributeNameStyle = { color: 'green' } ;
+const tagAttributeNameStyle = { color: 'green' } ;
 
 const numberStyle = { color: 'cyan' } ;
 const entityStyle = { color: 'cyan' } ;
@@ -115,9 +119,10 @@ const prog = {
 					state: 'closeTag'
 				} ,
 				{
-					// Definition: <? ... ?>
+					// Declaration: <? ... ?>
 					match: '?' ,
-					state: 'maybeDeclaration'
+					action: [ 'spanStyle' , 'tag' , declarationTagStyle ] ,
+					state: 'declarationTag'
 				} ,
 				{
 					// Could be a comments <!-- ... -->
@@ -197,7 +202,7 @@ const prog = {
 				} ,
 				{
 					match: /[ \t\n]/ ,
-					state: 'attributesPart'
+					state: 'openTagAttributesPart'
 				} ,
 				{
 					match: true ,
@@ -215,18 +220,18 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					state: 'attributesPart' ,
+					state: 'openTagAttributesPart' ,
 					propagate: true
 				}
 			]
 		} ,
-		attributesPart: {
+		openTagAttributesPart: {
 			action: [ 'style' , tagStyle ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_:-]/ ,
-					state: 'attributeName' ,
+					state: 'openTagAttributeName' ,
 					propagate: true
 				} ,
 				{
@@ -239,13 +244,13 @@ const prog = {
 				}
 			]
 		} ,
-		attributeName: {
-			action: [ 'style' , attributeNameStyle ] ,
+		openTagAttributeName: {
+			action: [ 'style' , tagAttributeNameStyle ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_:-]/ ,
-					state: 'attributeName'
+					state: 'openTagAttributeName'
 				} ,
 				{
 					match: '>' ,
@@ -257,28 +262,29 @@ const prog = {
 				} ,
 				{
 					match: '=' ,
-					state: 'attributeEqual'
+					state: 'openTagAttributeEqual'
 				}
 			]
 		} ,
-		attributeEqual: {
+		openTagAttributeEqual: {
 			action: [ 'style' , operatorStyle ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
 					match: true ,
-					state: 'attributeValue' ,
+					state: 'openTagAttributeValue' ,
 					propagate: true
 				}
 			]
 		} ,
-		attributeValue: {
+		openTagAttributeValue: {
 			action: [ 'style' , stringStyle ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
 					match: '"' ,
-					state: 'doubleQuoteAttributeValue'
+					subState: 'doubleQuoteAttributeValue' ,
+					state: 'openTagAttributesPart'
 				} ,
 				{
 					match: '>' ,
@@ -381,6 +387,150 @@ const prog = {
 
 
 
+		declarationTag: {
+			action: [ 'style' , declarationTagStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: true ,
+					state: 'declarationTagName' ,
+					propagate: true
+				}
+			]
+		} ,
+		maybeEndDeclarationTag: {
+			action: [ 'style' , declarationTagStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: '>' ,
+					state: 'endDeclarationTag' ,
+				} ,
+				{
+					match: true ,
+					state: 'declarationTagAttributesPart' ,
+					propagate: true
+				}
+			]
+		} ,
+		endDeclarationTag: {
+			action: [ 'style' , declarationTagStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: true ,
+					state: 'idle' ,
+					propagate: true
+				}
+			]
+		} ,
+		declarationTagName: {
+			action: [ 'style' , declarationTagNameStyle ] ,
+			span: 'tagName' ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: /[a-zA-Z0-9_-]/ ,
+					state: 'declarationTagName'
+				} ,
+				{
+					match: true ,
+					state: 'afterDeclarationTagName' ,
+					propagate: true
+				}
+			]
+		} ,
+		afterDeclarationTagName: {
+			action: [ 'style' , declarationTagNameStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: '?' ,
+					state: 'maybeEndDeclarationTag'
+				} ,
+				{
+					match: /[ \t\n]/ ,
+					state: 'declarationTagAttributesPart'
+				} ,
+				{
+					match: true ,
+					state: 'declarationTagError'
+				}
+			]
+		} ,
+		declarationTagAttributesPart: {
+			action: [ 'style' , declarationTagNameStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: /[a-zA-Z0-9_:-]/ ,
+					state: 'declarationTagAttributeName' ,
+					propagate: true
+				} ,
+				{
+					match: '?' ,
+					state: 'maybeEndDeclarationTag'
+				}
+			]
+		} ,
+		declarationTagAttributeName: {
+			action: [ 'style' , declarationTagAttributeNameStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: /[a-zA-Z0-9_:-]/ ,
+					state: 'declarationTagAttributeName'
+				} ,
+				{
+					match: '?' ,
+					state: 'maybeEndDeclarationTag'
+				} ,
+				{
+					match: '=' ,
+					state: 'declarationTagAttributeEqual'
+				}
+			]
+		} ,
+		declarationTagAttributeEqual: {
+			action: [ 'style' , operatorStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: true ,
+					state: 'declarationTagAttributeValue' ,
+					propagate: true
+				}
+			]
+		} ,
+		declarationTagAttributeValue: {
+			action: [ 'style' , stringStyle ] ,
+			expandSpan: 'tag' ,
+			branches: [
+				{
+					match: '"' ,
+					subState: 'doubleQuoteAttributeValue' ,
+					state: 'declarationTagAttributesPart'
+				} ,
+				{
+					match: '?' ,
+					state: 'maybeEndDeclarationTag'
+				}
+			]
+		} ,
+		declarationTagError: {
+			action: [ 'style' , parseErrorStyle ] ,
+			branches: [
+				{
+					match: '?' ,
+					state: 'maybeEndDeclarationTag'
+				}
+			]
+		} ,
+
+
+
+
+
 		doubleQuoteAttributeValue: {
 			action: [ 'style' , stringStyle ] ,
 			branches: [
@@ -390,12 +540,11 @@ const prog = {
 				} ,
 				{
 					match: '"' ,
-					state: 'attributesPart' ,
+					return: true ,
 					delay: true
 				}
 			]
 		} ,
-
 
 
 
