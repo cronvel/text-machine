@@ -19,7 +19,7 @@
 * buffer: `boolean` if set, start accumulating into a buffer until the state-change
 * span: `string` start or continue a span with the identified by the given name.
   For a span to continue, it must be contiguous.
-  *Spans* define areas that can be styled with the *spanStyle* action.
+  *Spans* define areas that can be styled with the *spanStyle* action, or *returnSpanStyle*.
 * microState: `object` set/unset some micro-states, key: micro-state name, value: `boolean` or `number` or `string` (true/number/string: set, false: unset).
 * storeInMicroState: `string` store the current buffer into that micro-state
 
@@ -55,6 +55,8 @@
   i.e. the matching character is not eaten is re-used by the new state
 * delay: `boolean` if set, the action of the state before branching will be used this time, instead of those of the new state
 * preserveBuffer: `boolean` if set, the buffer is preserved across the state-change
+* clearSpan: `true` or `string` or `Array` of `string`, if set to true, clear all span, if a string, clear only this specific span, if an array of string, clear
+  all specified span.
 
 MAYBE:
 * overide: `boolean` if set, the branch's action replace the next state's action once

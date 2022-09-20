@@ -108,6 +108,7 @@ const prog = {
 		} ,
 		maybeTag: {
 			action: [ 'style' , tagStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: '/' ,
@@ -135,6 +136,7 @@ const prog = {
 		openTag: {
 			action: [ 'style' , tagStyle ] ,
 			microState: { openTag: false } ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: '>' ,
@@ -149,6 +151,7 @@ const prog = {
 		} ,
 		endOpenTag: {
 			action: [ 'style' , tagStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: true ,
@@ -169,6 +172,7 @@ const prog = {
 		openTagName: {
 			action: [ 'style' , tagNameStyle ] ,
 			buffer: true ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_-]/ ,
@@ -184,6 +188,7 @@ const prog = {
 		} ,
 		afterOpenTagName: {
 			action: [ 'style' , tagNameStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: '>' ,
@@ -205,6 +210,7 @@ const prog = {
 		} ,
 		maybeSelfClosingTag: {
 			action: [ 'style' , tagStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: '>' ,
@@ -219,6 +225,7 @@ const prog = {
 		} ,
 		attributesPart: {
 			action: [ 'style' , tagStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_:-]/ ,
@@ -237,6 +244,7 @@ const prog = {
 		} ,
 		attributeName: {
 			action: [ 'style' , attributeNameStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_:-]/ ,
@@ -258,6 +266,7 @@ const prog = {
 		} ,
 		attributeEqual: {
 			action: [ 'style' , operatorStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: true ,
@@ -268,6 +277,7 @@ const prog = {
 		} ,
 		attributeValue: {
 			action: [ 'style' , stringStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: '"' ,
@@ -299,6 +309,7 @@ const prog = {
 
 		closeTag: {
 			action: [ 'style' , tagStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: '>' ,
@@ -313,6 +324,7 @@ const prog = {
 		} ,
 		closeTagName: {
 			action: [ 'style' , tagNameStyle ] ,
+			span: 'tag' ,
 			buffer: true ,
 			branches: [
 				{
@@ -329,6 +341,7 @@ const prog = {
 		} ,
 		afterCloseTagName: {
 			action: [ 'style' , tagNameStyle ] ,
+			span: 'tag' ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_-]/ ,
@@ -345,11 +358,13 @@ const prog = {
 			]
 		} ,
 		endCloseTag: {
+			span: 'tag' ,
 			returnAfter: 'openTagContent' ,
 			returnToMicroState: { openTag: [ 'microState' , 'closeTag' ] } ,
 			action: [ 'style' , tagStyle ] ,
 			//action: [ [ 'style' , tagStyle ] , [ 'openerStyle' , openTagStyle ] ] ,
-            returnErrorAction: [ 'style' , parseErrorStyle ] ,  // if not returning from 'endOpenTag', we've got a parseError
+            // if not returning from 'endOpenTag', we've got a parseError
+            returnErrorAction: [ [ 'spanStyle' , 'tag' , parseErrorStyle ] , [ 'returnSpanStyle' , 'tag' , parseErrorStyle ] ] ,
 			branches: [
 				{
 					match: true ,
