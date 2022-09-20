@@ -259,57 +259,59 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					store: 'autoCompletion' ,
+					store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
-				}
-			] ,
-			bufferBranches: [
-				{
-					match: 'this' ,
-					action: [ 'spanStyle' , 'identifier' , thisStyle ] ,
-					state: 'afterIdentifier' ,
-					propagate: true
-				} ,
-				{
-					match: keywords ,
-					action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
-					state: 'idle' ,
-					propagate: true
-				} ,
-				{
-					match: constantKeywords ,
-					action: [ 'spanStyle' , 'identifier' , constantKeywordStyle ] ,
-					state: 'idleAfterValue' ,
-					propagate: true
-				} ,
-				{
-					match: coreMethods ,
-					action: [ [ 'spanStyle' , 'identifier' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
-					store: 'autoCompletion' ,
-					state: 'idle' ,
-					propagate: true
-				} ,
-				{
-					match: coreClassesOrObjects ,
-					action: [ 'spanStyle' , 'identifier' , coreClassOrObjectStyle ] ,
-					store: 'autoCompletion' ,
-					state: 'afterIdentifier' ,
-					propagate: true
-				} ,
-				{
-					match: /^[A-Z][A-Z0-9_]+$/ ,
-					action: [ 'spanStyle' , 'identifier' , constantStyle ] ,
-					store: 'autoCompletion' ,
-					state: 'afterIdentifier' ,
-					propagate: true
-				} ,
-				{
-					match: /^[A-Z]/ ,
-					action: [ 'spanStyle' , 'identifier' , classStyle ] ,
-					store: 'autoCompletion' ,
-					state: 'afterClass' ,
-					propagate: true
+
+					branchOn: 'identifier' ,
+					spanBranches: [
+						{
+							match: 'this' ,
+							action: [ 'spanStyle' , 'identifier' , thisStyle ] ,
+							state: 'afterIdentifier' ,
+							propagate: true
+						} ,
+						{
+							match: keywords ,
+							action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
+							state: 'idle' ,
+							propagate: true
+						} ,
+						{
+							match: constantKeywords ,
+							action: [ 'spanStyle' , 'identifier' , constantKeywordStyle ] ,
+							state: 'idleAfterValue' ,
+							propagate: true
+						} ,
+						{
+							match: coreMethods ,
+							action: [ [ 'spanStyle' , 'identifier' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
+							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
+							state: 'idle' ,
+							propagate: true
+						} ,
+						{
+							match: coreClassesOrObjects ,
+							action: [ 'spanStyle' , 'identifier' , coreClassOrObjectStyle ] ,
+							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
+							state: 'afterIdentifier' ,
+							propagate: true
+						} ,
+						{
+							match: /^[A-Z][A-Z0-9_]+$/ ,
+							action: [ 'spanStyle' , 'identifier' , constantStyle ] ,
+							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
+							state: 'afterIdentifier' ,
+							propagate: true
+						} ,
+						{
+							match: /^[A-Z]/ ,
+							action: [ 'spanStyle' , 'identifier' , classStyle ] ,
+							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
+							state: 'afterClass' ,
+							propagate: true
+						}
+					]
 				}
 			]
 		} ,
@@ -394,17 +396,19 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					store: 'autoCompletion' ,
+					store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
-				}
-			] ,
-			bufferBranches: [
-				{
-					match: specialMember ,
-					action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
-					state: 'afterIdentifier' ,
-					propagate: true
+
+					branchOn: 'identifier' ,
+					spanBranches: [
+						{
+							match: specialMember ,
+							action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
+							state: 'afterIdentifier' ,
+							propagate: true
+						}
+					]
 				}
 			]
 		} ,
@@ -423,27 +427,29 @@ const prog = {
 					match: true ,
 					state: 'idle' ,
 					propagate: true ,
-				}
-			] ,
-			bufferBranches: [
-				{
-					match: '?' ,
-					action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
-					state: 'idle' ,
-					microState: { ternary: true } ,
-					propagate: true
-				} ,
-				{
-					match: operators ,
-					action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
-					state: 'idle' ,
-					propagate: true
-				} ,
-				{
-					match: assignments ,
-					action: [ 'spanStyle' , 'operator' , assignmentStyle ] ,
-					state: 'idle' ,
-					propagate: true
+
+					branchOn: 'operator' ,
+					spanBranches: [
+						{
+							match: '?' ,
+							action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
+							state: 'idle' ,
+							microState: { ternary: true } ,
+							propagate: true
+						} ,
+						{
+							match: operators ,
+							action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
+							state: 'idle' ,
+							propagate: true
+						} ,
+						{
+							match: assignments ,
+							action: [ 'spanStyle' , 'operator' , assignmentStyle ] ,
+							state: 'idle' ,
+							propagate: true
+						}
+					]
 				}
 			]
 		} ,

@@ -168,7 +168,7 @@ const prog = {
 		} ,
 		openTagName: {
 			action: [ 'style' , tagNameStyle ] ,
-			buffer: true ,
+			span: 'tagName' ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -178,7 +178,7 @@ const prog = {
 				{
 					match: true ,
 					state: 'afterOpenTagName' ,
-					microState: { openTag: [ 'buffer' ] } ,
+					microState: { openTag: [ 'span' , 'tagName' ] } ,
 					propagate: true
 				}
 			]
@@ -317,8 +317,8 @@ const prog = {
 		} ,
 		closeTagName: {
 			action: [ 'style' , tagNameStyle ] ,
+			span: 'tagName' ,
 			expandSpan: 'tag' ,
-			buffer: true ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9_-]/ ,
@@ -327,7 +327,7 @@ const prog = {
 				{
 					match: true ,
 					state: 'afterCloseTagName' ,
-					microState: { closeTag: [ 'buffer' ] } ,
+					microState: { closeTag: [ 'span' , 'tagName' ] } ,
 					propagate: true
 				}
 			]
