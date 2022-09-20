@@ -326,7 +326,7 @@ const prog = {
 				} ,
 				{
 					match: ':' ,
-					hasMicroState: 'ternary' ,
+					matchMicroState: 'ternary' ,
 					state: 'colon'
 				} ,
 				{
@@ -615,9 +615,11 @@ const prog = {
 			]
 		} ,
 		regexpCloseParenthesis: {
-			returnAfter: 'regexpOpenParenthesis' ,
 			action: [ [ 'style' , regexpParenthesisStyle ] , [ 'openerStyle' , regexpParenthesisStyle ] ] ,
-			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
+			return: {
+				matchState: 'regexpOpenParenthesis' ,
+				errorAction: [ 'style' , parseErrorStyle ]
+			} ,
 			branches: [
 				{
 					match: true ,
@@ -691,9 +693,11 @@ const prog = {
 			]
 		} ,
 		closeBrace: {
-			returnAfter: 'openBrace' ,
 			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
-			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
+			return: {
+				matchState: 'openBrace' ,
+				errorAction: [ 'style' , parseErrorStyle ]
+			} ,
 			branches: [
 				{
 					match: true ,
@@ -713,9 +717,11 @@ const prog = {
 			]
 		} ,
 		closeBracket: {
-			returnAfter: 'openBracket' ,
 			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
-			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
+			return: {
+				matchState: 'openBracket' ,
+				errorAction: [ 'style' , parseErrorStyle ]
+			} ,
 			branches: [
 				{
 					match: true ,
@@ -735,9 +741,11 @@ const prog = {
 			]
 		} ,
 		closeParenthesis: {
-			returnAfter: 'openParenthesis' ,
 			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
-			returnErrorAction: [ 'style' , parseErrorStyle ] ,	// if not returning from 'openBrace', we've got a parseError
+			return: {
+				matchState: 'openParenthesis' ,
+				errorAction: [ 'style' , parseErrorStyle ]
+			} ,
 			branches: [
 				{
 					match: true ,
