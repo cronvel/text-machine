@@ -158,15 +158,15 @@ const prog = {
 			action: [ 'style' , idleStyle ] ,
 			branches: [
 				{
-					match: /^[a-zA-Z_$]/ ,
+					match: /[a-zA-Z_$]/ ,
 					state: 'identifier'
 				} ,
 				{
-					match: /^[=.<>^?!&|~*%+-]/ ,
+					match: /[=.<>^?!&|~*%+-]/ ,
 					state: 'operator'
 				} ,
 				{
-					match: /^[0-9]/ ,
+					match: /[0-9]/ ,
 					state: 'number'
 				} ,
 				{
@@ -239,7 +239,7 @@ const prog = {
 			action: [ 'style' , numberStyle ] ,
 			branches: [
 				{
-					match: /^[0-9.]/ ,
+					match: /[0-9.]/ ,
 					state: 'number'
 				} ,
 				{
@@ -254,7 +254,7 @@ const prog = {
 			span: 'identifier' ,
 			branches: [
 				{
-					match: /^[a-zA-Z0-9_$]/ ,
+					match: /[a-zA-Z0-9_$]/ ,
 					state: 'identifier'
 				} ,
 				{
@@ -376,7 +376,7 @@ const prog = {
 					state: 'dotAfterIdentifier'
 				} ,
 				{
-					match: /^[a-zA-Z_$]/ ,
+					match: /[a-zA-Z_$]/ ,
 					state: 'member'
 				} ,
 				{
@@ -391,7 +391,7 @@ const prog = {
 			span: 'identifier' ,
 			branches: [
 				{
-					match: /^[a-zA-Z0-9_$]/ ,
+					match: /[a-zA-Z0-9_$]/ ,
 					state: 'member'
 				} ,
 				{
@@ -420,7 +420,7 @@ const prog = {
 			span: 'operator' ,
 			branches: [
 				{
-					match: /^[=.<>^?!&|~*%+-]/ ,
+					match: /[=.<>^?!&|~*%+-]/ ,
 					state: 'operator'
 				} ,
 				{
@@ -478,7 +478,7 @@ const prog = {
 					subState: 'escape'
 				} ,
 				{
-					match: /^['\n]/ ,
+					match: /['\n]/ ,
 					state: 'idleAfterValue' ,
 					delay: true
 				}
@@ -492,7 +492,7 @@ const prog = {
 					subState: 'escape'
 				} ,
 				{
-					match: /^["\n]/ ,
+					match: /["\n]/ ,
 					state: 'idleAfterValue' ,
 					delay: true
 				}

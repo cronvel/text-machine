@@ -1,0 +1,11 @@
+
+v0.4.0
+------
+
+BREAKING: refacto removed all buffer thing, instead one should use the more generic and flexible 'span'
+bufferBranches is replaced by spanBranches, and it's nested inside a regular branch
+it's now possible to continue a span, restart it, force expand it (even if there is a missing part), and copy it to another one
+return is refactored, it is an object (or true) with optional properties matchState, matchMicroState and errorAction (former returnErrorAction)
+XML highlighter refined
+
+
