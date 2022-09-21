@@ -28,23 +28,12 @@
 
 
 
-/* A XML parser */
+/* Modified from XML parser */
 
 
 
 const idleStyle = { color: 'white' } ;
 const operatorStyle = { color: 'brightWhite' , bold: true } ;
-
-// <? ... ?>
-const declarationTagStyle = { color: 'brightMagenta' } ;
-const declarationTagNameStyle = { color: 'magenta' } ;
-const declarationTagAttributeNameStyle = { color: 'magenta' } ;
-
-// <! ... >
-const definitionTagStyle = { color: 'brightMagenta' } ;
-const definitionTagNameStyle = { color: 'magenta' } ;
-const definitionTagAttributeNameStyle = { color: 'magenta' } ;
-const definitionTagBracketStyle = { color: 'brightMagenta' , bold: true } ;
 
 const tagStyle = { color: 'brightYellow' } ;
 const tagNameStyle = { color: 'yellow' } ;
@@ -56,8 +45,11 @@ const stringStyle = { color: 'blue' } ;
 const escapeStyle = { color: 'brightCyan' , bold: true } ;
 
 const commentStyle = { color: 'gray' } ;
-const cdataStyle = { color: 'white' } ;
+const cdataStyle = { color: 'white' , italic: true } ;
 const propertyStyle = { color: 'green' } ;
+
+const embeddedStyle = { color: 'brightWhite' , bgColor: 'yellow' , bold: true } ;
+const debugStyle = { color: 'brightWhite' , bgColor: 'green' , bold: true } ;
 
 const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
 
@@ -76,11 +68,6 @@ const prog = {
 				{
 					match: '<' ,
 					state: 'maybeTag'
-				} ,
-				{
-					match: ']' ,
-					matchMicroState: 'nestedDefinitionTag' ,
-					state: 'closeNestedDefinitionTag'
 				} ,
 				{
 					match: '&' ,
@@ -135,15 +122,7 @@ const prog = {
 					state: 'closeTag'
 				} ,
 				{
-					// Declaration: <? ... ?>
-					match: '?' ,
-					action: [ 'spanStyle' , 'tag' , declarationTagStyle ] ,
-					state: 'declarationTag'
-				} ,
-				{
 					// Could be a comments <!-- ... -->
-					// Could be a <!DOCTYPE html> or <!ENTITY ... >
-					// Could be a <![CDATA[ ... ]]>
 					match: '!' ,
 					state: 'maybeComment'
 				} ,
@@ -239,7 +218,17 @@ const prog = {
 					match: true ,
 					subState: 'openTagContent' ,
 					state: 'idle' ,
-					propagate: true
+					propagate: true ,
+					
+					branchOn: 'tagName' ,
+					spanBranches: [
+						{
+							match: 'script' ,
+							subState: 'openEmbedded' ,
+							state: 'idle' ,
+							propagate: true
+						}
+					]
 				}
 			]
 		} ,
@@ -426,18 +415,6 @@ const prog = {
 					state: 'maybeComment2'
 				} ,
 				{
-					// Could be a <![CDATA[ ... ]]>
-					match: '[' ,
-					state: 'maybeCDATA'
-				} ,
-				{
-					// Could be a <!DOCTYPE html>, <!ENTITY ... >, <!ATTLIST ... >,  <!ELEMENT ... >, etc...
-					match: /[a-zA-Z0-9_-]/ ,
-					action: [ 'spanStyle' , 'tag' , definitionTagStyle ] ,
-					state: 'definitionTagName' ,
-					propagate: true
-				} ,
-				{
 					match: true ,
 					state: 'openTagError' ,
 					propagate: true
@@ -520,399 +497,105 @@ const prog = {
 
 
 
-		maybeCDATA: {
+		openEmbedded: {
+			branches: [
+				{
+					match: true ,
+					state: 'embedded' ,
+					propagate: true
+				}
+			]
+		} ,
+		embedded: {
+			action: [ 'style' , embeddedStyle ] ,
+			branches: [
+				{
+					match: '<' ,
+					state: 'maybeEmbeddedCloseTag'
+				}
+			]
+		} ,
+		maybeEmbeddedCloseTag: {
 			action: [ 'style' , tagStyle ] ,
-			span: [ 'tag' , 'CDATAMark' ] ,
+			startSpan: 'embeddedTag' ,
 			branches: [
 				{
-					match: /[CDAT[]/ ,
-					state: 'maybeCDATA' ,
+					match: '/' ,
+					state: 'maybeEmbeddedCloseTag2'
 				} ,
 				{
 					match: true ,
-					state: 'openTagError' ,
-					propagate: true ,
-					
-					branchOn: 'CDATAMark' ,
-					spanBranches: [
-						{
-							match: '[CDATA[' ,
-							state: 'CDATA'
-						}
-					]
-				}
-			]
-		} ,
-		CDATA: {
-			action: [ 'style' , cdataStyle ] ,
-			branches: [
-				{
-					match: ']' ,
-					state: 'maybeEndCDATA'
-				}
-			]
-		} ,
-		maybeEndCDATA: {
-			action: [ 'style' , cdataStyle ] ,
-			span: 'closeCDATA' ,
-			branches: [
-				{
-					match: ']' ,
-					state: 'maybeEndCDATA2'
-				} ,
-				{
-					match: true ,
-					state: 'CDATA' ,
+					state: 'embedded' ,
 					propagate: true
 				}
 			]
 		} ,
-		maybeEndCDATA2: {
-			action: [ 'style' , cdataStyle ] ,
-			span: [ 'closeCDATA' , 'closeCDATA2' ] ,
+		maybeEmbeddedCloseTag2: {
+			action: [ 'style' , tagStyle ] ,
+			expandSpan: 'embeddedTag' ,
 			branches: [
 				{
-					match: '>' ,
-					state: 'endCDATA'
-				} ,
-				{
-					match: ']' ,
-					state: 'maybeEndCDATA2' ,
-					copySpan: [ 'closeCDATA2' , 'closeCDATA' ]
-				} ,
-				{
 					match: true ,
-					state: 'CDATA' ,
+					state: 'embeddedCloseTagName' ,
 					propagate: true
 				}
 			]
 		} ,
-		endCDATA: {
-			action: [ 'spanStyle' , 'closeCDATA' , tagStyle ] ,
-			span: 'closeCDATA' ,
-			branches: [
-				{
-					match: true ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-
-
-
-
-
-		// Declaration: <? ... ?>
-		declarationTag: {
-			action: [ 'style' , declarationTagStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: true ,
-					state: 'declarationTagName' ,
-					propagate: true
-				}
-			]
-		} ,
-		maybeEndDeclarationTag: {
-			action: [ 'style' , declarationTagStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: '>' ,
-					state: 'endDeclarationTag' ,
-				} ,
-				{
-					match: true ,
-					state: 'declarationTagAttributesPart' ,
-					propagate: true
-				}
-			]
-		} ,
-		endDeclarationTag: {
-			action: [ 'style' , declarationTagStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: true ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-		declarationTagName: {
-			action: [ 'style' , declarationTagNameStyle ] ,
-			span: 'tagName' ,
-			expandSpan: 'tag' ,
+		embeddedCloseTagName: {
+			action: [ 'style' , tagNameStyle ] ,
+			span: 'embeddedCloseTagName' ,
+			expandSpan: 'embeddedTag' ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9:_-]/ ,
-					state: 'declarationTagName'
+					state: 'embeddedCloseTagName'
 				} ,
 				{
 					match: true ,
-					state: 'afterDeclarationTagName' ,
+					state: 'afterEmbeddedCloseTagName' ,
+					microState: { closeTag: [ 'span' , 'embeddedCloseTagName' ] } ,
 					propagate: true
 				}
 			]
 		} ,
-		afterDeclarationTagName: {
-			action: [ 'style' , declarationTagNameStyle ] ,
-			expandSpan: 'tag' ,
+		afterEmbeddedCloseTagName: {
+			action: [ 'style' , tagNameStyle ] ,
+			expandSpan: 'embeddedTag' ,
 			branches: [
 				{
-					match: '?' ,
-					state: 'maybeEndDeclarationTag'
-				} ,
-				{
-					match: /[ \t\n]/ ,
-					state: 'declarationTagAttributesPart'
-				} ,
-				{
-					match: true ,
-					state: 'declarationTagError'
-				}
-			]
-		} ,
-		declarationTagAttributesPart: {
-			action: [ 'style' , declarationTagNameStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: /[a-zA-Z0-9:_-]/ ,
-					state: 'declarationTagAttributeName' ,
-					propagate: true
-				} ,
-				{
-					match: '?' ,
-					state: 'maybeEndDeclarationTag'
-				}
-			]
-		} ,
-		declarationTagAttributeName: {
-			action: [ 'style' , declarationTagAttributeNameStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: /[a-zA-Z0-9:_-]/ ,
-					state: 'declarationTagAttributeName'
-				} ,
-				{
-					match: '?' ,
-					state: 'maybeEndDeclarationTag'
-				} ,
-				{
-					match: '=' ,
-					state: 'declarationTagAttributeEqual'
-				}
-			]
-		} ,
-		declarationTagAttributeEqual: {
-			action: [ 'style' , operatorStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: true ,
-					state: 'declarationTagAttributeValue' ,
-					propagate: true
-				}
-			]
-		} ,
-		declarationTagAttributeValue: {
-			action: [ 'style' , stringStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: '"' ,
-					subState: 'doubleQuoteAttributeValue' ,
-					state: 'declarationTagAttributesPart'
-				} ,
-				{
-					match: '?' ,
-					state: 'maybeEndDeclarationTag'
-				}
-			]
-		} ,
-		declarationTagError: {
-			action: [ 'style' , parseErrorStyle ] ,
-			branches: [
-				{
-					match: '?' ,
-					state: 'maybeEndDeclarationTag'
-				}
-			]
-		} ,
-
-
-
-
-		// Definition: <! ... >
-		// Can be nested: <!DOCTYPE mydoctype [ <!ELEMENT ... > ]>
-		definitionTag: {
-			action: [ 'style' , definitionTagStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: true ,
-					state: 'definitionTagName' ,
-					propagate: true
-				}
-			]
-		} ,
-		endDefinitionTag: {
-			action: [ 'style' , definitionTagStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: true ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-		definitionTagName: {
-			action: [ 'style' , definitionTagNameStyle ] ,
-			span: 'tagName' ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: /[a-zA-Z0-9:_-]/ ,
-					state: 'definitionTagName'
-				} ,
-				{
-					match: true ,
-					state: 'afterDefinitionTagName' ,
-					propagate: true
-				}
-			]
-		} ,
-		afterDefinitionTagName: {
-			action: [ 'style' , definitionTagNameStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: '>' ,
-					state: 'endDefinitionTag'
-				} ,
-				{
-					match: /[ \t\n]/ ,
-					state: 'definitionTagAttributesPart'
-				} ,
-				{
-					match: '[' ,
-					subState: 'openNestedDefinitionTag'
-				} ,
-				{
-					match: true ,
-					state: 'definitionTagError'
-				}
-			]
-		} ,
-		definitionTagAttributesPart: {
-			action: [ 'style' , definitionTagNameStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: /[a-zA-Z0-9:_-]/ ,
-					state: 'definitionTagAttributeName' ,
-					propagate: true
-				} ,
-				{
-					match: '[' ,
-					subState: 'openNestedDefinitionTag'
+					match: /[a-zA-Z0-9_-]/ ,
+					state: 'embeddedCloseTagName'
 				} ,
 				{
 					match: '>' ,
-					state: 'endDefinitionTag'
-				}
-			]
-		} ,
-		definitionTagAttributeName: {
-			action: [ 'style' , definitionTagAttributeNameStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: /[a-zA-Z0-9:_-]/ ,
-					state: 'definitionTagAttributeName'
+					state: 'endEmbeddedCloseTag'
 				} ,
-				{
-					match: /[ \t\n]/ ,
-					state: 'definitionTagAttributesPart'
-				} ,
-				{
-					match: '>' ,
-					state: 'endDefinitionTag'
-				} ,
-				{
-					match: '=' ,
-					state: 'definitionTagAttributeEqual'
-				}
-			]
-		} ,
-		definitionTagAttributeEqual: {
-			action: [ 'style' , operatorStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
 				{
 					match: true ,
-					state: 'definitionTagAttributeValue' ,
-					propagate: true
+					state: 'embedded'
 				}
 			]
 		} ,
-		definitionTagAttributeValue: {
-			action: [ 'style' , stringStyle ] ,
-			expandSpan: 'tag' ,
-			branches: [
-				{
-					match: '"' ,
-					subState: 'doubleQuoteAttributeValue' ,
-					state: 'definitionTagAttributesPart'
-				} ,
-				{
-					match: '>' ,
-					state: 'endDefinitionTag'
-				}
-			]
-		} ,
-		openNestedDefinitionTag: {
-			action: [ 'style' , parseErrorStyle ] ,
-			branches: [
-				{
-					match: true ,
-					microState: { nestedDefinitionTag: true } ,
-					state: 'idle' ,
-					propagate: true
-				}
-			]
-		} ,
-		closeNestedDefinitionTag: {
-			action: [ [ 'style' , definitionTagBracketStyle ] , [ 'openerStyle' , definitionTagBracketStyle ] ] ,
+		endEmbeddedCloseTag: {
+			expandSpan: 'embeddedTag' ,
+			action: [ 'style' , tagStyle ] ,
 			return: {
-				matchState: 'openNestedDefinitionTag' ,
-				errorAction: [ 'style' , parseErrorStyle ]
+				// if not returning from 'endOpenTag', we've got a parseError
+				matchState: 'openEmbedded' ,
+				matchMicroState: { openTag: [ 'microState' , 'closeTag' ] } ,
+				errorAction: [ [ 'spanStyle' , 'tag' , parseErrorStyle ] , [ 'returnSpanStyle' , 'tag' , parseErrorStyle ] ] ,
 			} ,
 			branches: [
 				{
 					match: true ,
-					state: 'definitionTagError' ,
+					state: 'idle' ,
 					propagate: true
 				}
 			]
 		} ,
-		definitionTagError: {
-			action: [ 'style' , parseErrorStyle ] ,
-			branches: [
-				{
-					match: '>' ,
-					state: 'endDefinitionTag'
-				}
-			]
-		} ,
-
-
-
+		
+		
+		
 
 
 
