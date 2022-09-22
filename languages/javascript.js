@@ -79,7 +79,7 @@ const keywords = [
 	'delete' ,
 	'enum' , 'eval' , 'void' , 'with' , 
 	
-	'export' , 'import' , 'package' , 
+	'export' , 'import' , 'from' , 'package' , 
 	'debugger' ,
 ] ;
 

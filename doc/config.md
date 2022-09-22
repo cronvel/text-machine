@@ -66,6 +66,8 @@ MAYBE:
 	* matchMicroState: the parent's micro-states should match, or it will be considered as a parse error
 	* errorAction: like an *action*, but will be used instead if any error occurs (mismatching state or micro-state)
   It's mostly the same than branch's *return* property, except that *return.errorAction* trigger immediately if it should.
+* embedded: `string` or `null`, if set, embed another TextMachine instance (and reset it) into this one. The embedded execute before the host.
+  The embedded is stopped when `embedded: null` is encountered in the host machine.
 * propagate: `boolean` if set, the event-character is issued again after the state have changed,
   i.e. the matching character is not eaten is re-used by the new state.
 * delay: `boolean` if set, the action of the state before branching will be used this time, instead of those of the new state.

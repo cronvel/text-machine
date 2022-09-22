@@ -48,15 +48,16 @@ const commentStyle = { color: 'gray' } ;
 const cdataStyle = { color: 'white' , italic: true } ;
 const propertyStyle = { color: 'green' } ;
 
-const embeddedStyle = { color: 'brightWhite' , bgColor: 'yellow' , bold: true } ;
 const debugStyle = { color: 'brightWhite' , bgColor: 'green' , bold: true } ;
-
 const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
 
 
 
 const prog = {
 	hostConfig: {	// Accessible by the host
+	} ,
+	embedded: {
+		javascript: require( './javascript.js' )
 	} ,
 	config: {
 		initState: 'idle'
@@ -501,13 +502,13 @@ const prog = {
 			branches: [
 				{
 					match: true ,
+					embedded: 'javascript' ,
 					state: 'embedded' ,
 					propagate: true
 				}
 			]
 		} ,
 		embedded: {
-			action: [ 'style' , embeddedStyle ] ,
 			branches: [
 				{
 					match: '<' ,
@@ -537,6 +538,7 @@ const prog = {
 				{
 					match: true ,
 					state: 'embeddedCloseTagName' ,
+					embdedded: null ,
 					propagate: true
 				}
 			]
