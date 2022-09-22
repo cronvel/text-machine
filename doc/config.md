@@ -66,8 +66,11 @@ MAYBE:
 	* matchMicroState: the parent's micro-states should match, or it will be considered as a parse error
 	* errorAction: like an *action*, but will be used instead if any error occurs (mismatching state or micro-state)
   It's mostly the same than branch's *return* property, except that *return.errorAction* trigger immediately if it should.
-* embedded: `string` or `null`, if set, embed another TextMachine instance (and reset it) into this one. The embedded execute before the host.
-  The embedded is stopped when `embedded: null` is encountered in the host machine.
+* embedded: `null` or `string` or `Array` of `string`, if set, embed another TextMachine instance (and reset it) into this one.
+  When set to an array of string, it is a dynamic value (see below).
+  Once set, when an event is received, the embedded textMachine executes before the host.
+  It is the responsibility of the host machine to parse silently (no action) during the time the embedded machine is running, or it would overwrite style.
+  The host machine can stop the embedded machine anytime by setting `embedded` to `null`.
 * propagate: `boolean` if set, the event-character is issued again after the state have changed,
   i.e. the matching character is not eaten is re-used by the new state.
 * delay: `boolean` if set, the action of the state before branching will be used this time, instead of those of the new state.
@@ -79,8 +82,10 @@ MAYBE:
 
 ## SPECIAL DYNAMIC VALUES:
 
-It's possible for `microState` and `matchMicroState` to pass an array instead of the number/string, that will provide a dynamic.
+It's possible for `microState`, `matchMicroState`, `embedded`, etc, to pass an array instead of the number/string,
+so that instead of a static value, a dynamic value will be produced.
 
-* If the #0 element is 'buffer', then it will be replaced by the current value of the buffer.
+* If the #0 element is 'parent', then the parent state is used instead of the current one, elements are then shifted to the left (element #0 is destroyed).
 * If the #0 element is 'microState' and there is a #1 element, then it will be replaced by the current value of the micro-state having #1 as its name.
+* If the #0 element is 'span', and there is a #1 element, then it will be replaced by the current content of the span having #1 as its name.
 

@@ -57,7 +57,8 @@ const prog = {
 	hostConfig: {	// Accessible by the host
 	} ,
 	embedded: {
-		javascript: require( './javascript.js' )
+		javascript: require( './javascript.js' ) ,
+		css: require( './css.js' )
 	} ,
 	config: {
 		initState: 'idle'
@@ -225,6 +226,14 @@ const prog = {
 					spanBranches: [
 						{
 							match: 'script' ,
+							microState: { embedded: 'javascript' } ,
+							subState: 'openEmbedded' ,
+							state: 'idle' ,
+							propagate: true
+						} ,
+						{
+							match: 'style' ,
+							microState: { embedded: 'css' } ,
 							subState: 'openEmbedded' ,
 							state: 'idle' ,
 							propagate: true
@@ -502,8 +511,8 @@ const prog = {
 			branches: [
 				{
 					match: true ,
-					embedded: 'javascript' ,
 					state: 'embedded' ,
+					embedded: [ 'parent' , 'microState' , 'embedded' ] ,
 					propagate: true
 				}
 			]
@@ -537,8 +546,9 @@ const prog = {
 			branches: [
 				{
 					match: true ,
+					embedded: null ,
 					state: 'embeddedCloseTagName' ,
-					embdedded: null ,
+					action: [ 'spanStyle' , 'embeddedTag' , tagStyle ] ,
 					propagate: true
 				}
 			]
