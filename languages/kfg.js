@@ -80,10 +80,26 @@ const prog = {
 		regexpClassRange: { color: 'magenta' } ,
 		regexpFlag: { color: 'green' } ,
 
+		brace: { color: 'brightWhite' , bold: true }  ,
+
 		parseError: { color: 'brightWhite' , bgColor: 'red' , bold: true } ,
-		brace: { color: 'brightWhite' , bold: true } 
+		unexistantState: { color: 'brightWhite' , bgColor: 'magenta' , bold: true }
+	} ,
+	devMode: {
+		// Should be removed when dev is finished
+		fallbackState: 'unexistantState'
 	} ,
 	states: {
+		unexistantState: {
+			// This is a dev state, to be removed...
+			action: [ 'style' , 'unexistantState' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				}
+			]
+		} ,
 		idle: {
 			action: [ 'style' , 'idle' ] ,
 			branches: [
@@ -148,7 +164,7 @@ const prog = {
 		} ,
 		maybeValueOrKey: {
 			action: [ 'style' , 'idle' ] ,
-			span: 'key' ,
+			span: 'maybeValueOrKey' ,
 			branches: [
 				{
 					match: /[a-zA-Z-]/ ,
@@ -157,8 +173,9 @@ const prog = {
 				{
 					match: true ,
 					state: 'maybeValueOrKeyNotConstant' ,
+					propagate: true ,
 					
-					branchOn: 'identifier' ,
+					branchOn: 'maybeValueOrKey' ,
                     spanBranches: [
                     	{
 							match: constantKeywords ,
@@ -180,13 +197,9 @@ const prog = {
 				} ,
 				{
 					match: ':' ,
-					action: [ 'spanStyle' , 'property' ] ,
-					state: 'key'
-				} ,
-				{
-					match: true ,
-					state: 'maybeValueOrKeyNotConstant'
-				} ,
+					action: [ 'spanStyle' , 'maybeValueOrKey' , 'property' ] ,
+					state: 'afterKey'
+				}
 			]
 		} ,
 
