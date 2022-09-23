@@ -32,46 +32,45 @@
 
 
 
-const idleStyle = { color: 'white' } ;
-const operatorStyle = { color: 'brightWhite' , bold: true } ;
-
-// <? ... ?>
-const declarationTagStyle = { color: 'brightMagenta' } ;
-const declarationTagNameStyle = { color: 'magenta' } ;
-const declarationTagAttributeNameStyle = { color: 'magenta' } ;
-
-// <! ... >
-const definitionTagStyle = { color: 'brightMagenta' } ;
-const definitionTagNameStyle = { color: 'magenta' } ;
-const definitionTagAttributeNameStyle = { color: 'magenta' } ;
-const definitionTagBracketStyle = { color: 'brightMagenta' , bold: true } ;
-
-const tagStyle = { color: 'brightYellow' } ;
-const tagNameStyle = { color: 'yellow' } ;
-const tagAttributeNameStyle = { color: 'green' } ;
-
-const numberStyle = { color: 'cyan' } ;
-const entityStyle = { color: 'cyan' } ;
-const stringStyle = { color: 'blue' } ;
-const escapeStyle = { color: 'brightCyan' , bold: true } ;
-
-const commentStyle = { color: 'gray' } ;
-const cdataStyle = { color: 'white' } ;
-const propertyStyle = { color: 'green' } ;
-
-const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
-
-
-
 const prog = {
 	hostConfig: {	// Accessible by the host
 	} ,
 	config: {
 		initState: 'idle'
 	} ,
+	styles: {
+		idle: { color: 'white' } ,
+		operator: { color: 'brightWhite' , bold: true } ,
+
+		// <? ... ?>
+		declarationTag: { color: 'brightMagenta' } ,
+		declarationTagName: { color: 'magenta' } ,
+		declarationTagAttributeName: { color: 'magenta' } ,
+
+		// <! ... >
+		definitionTag: { color: 'brightMagenta' } ,
+		definitionTagName: { color: 'magenta' } ,
+		definitionTagAttributeName: { color: 'magenta' } ,
+		definitionTagBracket: { color: 'brightMagenta' , bold: true } ,
+
+		tag: { color: 'brightYellow' } ,
+		tagName: { color: 'yellow' } ,
+		tagAttributeName: { color: 'green' } ,
+
+		number: { color: 'cyan' } ,
+		entity: { color: 'cyan' } ,
+		string: { color: 'blue' } ,
+		escape: { color: 'brightCyan' , bold: true } ,
+
+		comment: { color: 'gray' } ,
+		cdata: { color: 'white' } ,
+		property: { color: 'green' } ,
+
+		parseError: { color: 'brightWhite' , bgColor: 'red' , bold: true }
+	} ,
 	states: {
 		idle: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: '<' ,
@@ -89,7 +88,7 @@ const prog = {
 			]
 		} ,
 		entity: {
-			action: [ 'style' , entityStyle ] ,
+			action: [ 'style' , 'entity' ] ,
 			branches: [
 				{
 					match: /[#a-z0-9]/ ,
@@ -97,14 +96,14 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					action: [ 'streakStyle' , parseErrorStyle ] ,
+					action: [ 'streakStyle' , 'parseError' ] ,
 					state: 'idle' ,
 					propagate: true
 				}
 			]
 		} ,
 		entityName: {
-			action: [ 'style' , entityStyle ] ,
+			action: [ 'style' , 'entity' ] ,
 			branches: [
 				{
 					match: /[a-z0-9]/ ,
@@ -117,7 +116,7 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					action: [ 'streakStyle' , parseErrorStyle ] ,
+					action: [ 'streakStyle' , 'parseError' ] ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -127,7 +126,7 @@ const prog = {
 
 
 		maybeTag: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			startSpan: 'tag' ,
 			branches: [
 				{
@@ -137,7 +136,7 @@ const prog = {
 				{
 					// Declaration: <? ... ?>
 					match: '?' ,
-					action: [ 'spanStyle' , 'tag' , declarationTagStyle ] ,
+					action: [ 'spanStyle' , 'tag' , 'declarationTag' ] ,
 					state: 'declarationTag'
 				} ,
 				{
@@ -155,7 +154,7 @@ const prog = {
 			]
 		} ,
 		openTag: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			microState: { openTag: false } ,
 			expandSpan: 'tag' ,
 			branches: [
@@ -167,7 +166,7 @@ const prog = {
 			]
 		} ,
 		openTagName: {
-			action: [ 'style' , tagNameStyle ] ,
+			action: [ 'style' , 'tagName' ] ,
 			span: 'tagName' ,
 			expandSpan: 'tag' ,
 			branches: [
@@ -184,7 +183,7 @@ const prog = {
 			]
 		} ,
 		afterOpenTagName: {
-			action: [ 'style' , tagNameStyle ] ,
+			action: [ 'style' , 'tagName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -206,7 +205,7 @@ const prog = {
 			]
 		} ,
 		maybeSelfClosingTag: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -221,7 +220,7 @@ const prog = {
 			]
 		} ,
 		endSelfClosingTag: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -232,7 +231,7 @@ const prog = {
 			]
 		} ,
 		endOpenTag: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -253,7 +252,7 @@ const prog = {
 			]
 		} ,
 		openTagAttributesPart: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -272,7 +271,7 @@ const prog = {
 			]
 		} ,
 		openTagAttributeName: {
-			action: [ 'style' , tagAttributeNameStyle ] ,
+			action: [ 'style' , 'tagAttributeName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -294,7 +293,7 @@ const prog = {
 			]
 		} ,
 		openTagAttributeEqual: {
-			action: [ 'style' , operatorStyle ] ,
+			action: [ 'style' , 'operator' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -305,7 +304,7 @@ const prog = {
 			]
 		} ,
 		openTagAttributeValue: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -324,7 +323,7 @@ const prog = {
 			]
 		} ,
 		openTagError: {
-			action: [ 'spanStyle' , 'tag' , parseErrorStyle ] ,
+			action: [ 'spanStyle' , 'tag' , 'parseError' ] ,
 			span: 'tag' ,
 			branches: [
 				{
@@ -340,7 +339,7 @@ const prog = {
 
 
 		closeTag: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -351,7 +350,7 @@ const prog = {
 			]
 		} ,
 		closeTagName: {
-			action: [ 'style' , tagNameStyle ] ,
+			action: [ 'style' , 'tagName' ] ,
 			span: 'tagName' ,
 			expandSpan: 'tag' ,
 			branches: [
@@ -368,7 +367,7 @@ const prog = {
 			]
 		} ,
 		afterCloseTagName: {
-			action: [ 'style' , tagNameStyle ] ,
+			action: [ 'style' , 'tagName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -387,12 +386,12 @@ const prog = {
 		} ,
 		endCloseTag: {
 			expandSpan: 'tag' ,
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			return: {
 				// if not returning from 'endOpenTag', we've got a parseError
 				matchState: 'openTagContent' ,
 				matchMicroState: { openTag: [ 'microState' , 'closeTag' ] } ,
-				errorAction: [ [ 'spanStyle' , 'tag' , parseErrorStyle ] , [ 'returnSpanStyle' , 'tag' , parseErrorStyle ] ] ,
+				errorAction: [ [ 'spanStyle' , 'tag' , 'parseError' ] , [ 'returnSpanStyle' , 'tag' , 'parseError' ] ] ,
 			} ,
 			branches: [
 				{
@@ -403,7 +402,7 @@ const prog = {
 			]
 		} ,
 		closeTagError: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: '>' ,
@@ -417,7 +416,7 @@ const prog = {
 
 
 		maybeComment: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			span: 'tag' ,
 			branches: [
 				{
@@ -433,7 +432,7 @@ const prog = {
 				{
 					// Could be a <!DOCTYPE html>, <!ENTITY ... >, <!ATTLIST ... >,  <!ELEMENT ... >, etc...
 					match: /[a-zA-Z0-9_-]/ ,
-					action: [ 'spanStyle' , 'tag' , definitionTagStyle ] ,
+					action: [ 'spanStyle' , 'tag' , 'definitionTag' ] ,
 					state: 'definitionTagName' ,
 					propagate: true
 				} ,
@@ -445,12 +444,12 @@ const prog = {
 			]
 		} ,
 		maybeComment2: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			span: 'tag' ,
 			branches: [
 				{
 					match: '-' ,
-					action: [ 'spanStyle' , 'tag' , commentStyle ] ,
+					action: [ 'spanStyle' , 'tag' , 'comment' ] ,
 					state: 'comment' ,
 				} ,
 				{
@@ -461,7 +460,7 @@ const prog = {
 			]
 		} ,
 		comment: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			span: 'tag' ,
 			branches: [
 				{
@@ -471,7 +470,7 @@ const prog = {
 			]
 		} ,
 		maybeEndComment: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			span: 'tag' ,
 			branches: [
 				{
@@ -486,7 +485,7 @@ const prog = {
 			]
 		} ,
 		maybeEndComment2: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			span: 'tag' ,
 			branches: [
 				{
@@ -505,7 +504,7 @@ const prog = {
 			]
 		} ,
 		endComment: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			span: 'tag' ,
 			branches: [
 				{
@@ -521,7 +520,7 @@ const prog = {
 
 
 		maybeCDATA: {
-			action: [ 'style' , tagStyle ] ,
+			action: [ 'style' , 'tag' ] ,
 			span: [ 'tag' , 'CDATAMark' ] ,
 			branches: [
 				{
@@ -544,7 +543,7 @@ const prog = {
 			]
 		} ,
 		CDATA: {
-			action: [ 'style' , cdataStyle ] ,
+			action: [ 'style' , 'cdata' ] ,
 			branches: [
 				{
 					match: ']' ,
@@ -553,7 +552,7 @@ const prog = {
 			]
 		} ,
 		maybeEndCDATA: {
-			action: [ 'style' , cdataStyle ] ,
+			action: [ 'style' , 'cdata' ] ,
 			span: 'closeCDATA' ,
 			branches: [
 				{
@@ -568,7 +567,7 @@ const prog = {
 			]
 		} ,
 		maybeEndCDATA2: {
-			action: [ 'style' , cdataStyle ] ,
+			action: [ 'style' , 'cdata' ] ,
 			span: [ 'closeCDATA' , 'closeCDATA2' ] ,
 			branches: [
 				{
@@ -588,7 +587,7 @@ const prog = {
 			]
 		} ,
 		endCDATA: {
-			action: [ 'spanStyle' , 'closeCDATA' , tagStyle ] ,
+			action: [ 'spanStyle' , 'closeCDATA' , 'tag' ] ,
 			span: 'closeCDATA' ,
 			branches: [
 				{
@@ -605,7 +604,7 @@ const prog = {
 
 		// Declaration: <? ... ?>
 		declarationTag: {
-			action: [ 'style' , declarationTagStyle ] ,
+			action: [ 'style' , 'declarationTag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -616,7 +615,7 @@ const prog = {
 			]
 		} ,
 		maybeEndDeclarationTag: {
-			action: [ 'style' , declarationTagStyle ] ,
+			action: [ 'style' , 'declarationTag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -631,7 +630,7 @@ const prog = {
 			]
 		} ,
 		endDeclarationTag: {
-			action: [ 'style' , declarationTagStyle ] ,
+			action: [ 'style' , 'declarationTag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -642,7 +641,7 @@ const prog = {
 			]
 		} ,
 		declarationTagName: {
-			action: [ 'style' , declarationTagNameStyle ] ,
+			action: [ 'style' , 'declarationTagName' ] ,
 			span: 'tagName' ,
 			expandSpan: 'tag' ,
 			branches: [
@@ -658,7 +657,7 @@ const prog = {
 			]
 		} ,
 		afterDeclarationTagName: {
-			action: [ 'style' , declarationTagNameStyle ] ,
+			action: [ 'style' , 'declarationTagName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -676,7 +675,7 @@ const prog = {
 			]
 		} ,
 		declarationTagAttributesPart: {
-			action: [ 'style' , declarationTagNameStyle ] ,
+			action: [ 'style' , 'declarationTagName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -691,7 +690,7 @@ const prog = {
 			]
 		} ,
 		declarationTagAttributeName: {
-			action: [ 'style' , declarationTagAttributeNameStyle ] ,
+			action: [ 'style' , 'declarationTagAttributeName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -709,7 +708,7 @@ const prog = {
 			]
 		} ,
 		declarationTagAttributeEqual: {
-			action: [ 'style' , operatorStyle ] ,
+			action: [ 'style' , 'operator' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -720,7 +719,7 @@ const prog = {
 			]
 		} ,
 		declarationTagAttributeValue: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -735,7 +734,7 @@ const prog = {
 			]
 		} ,
 		declarationTagError: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: '?' ,
@@ -750,7 +749,7 @@ const prog = {
 		// Definition: <! ... >
 		// Can be nested: <!DOCTYPE mydoctype [ <!ELEMENT ... > ]>
 		definitionTag: {
-			action: [ 'style' , definitionTagStyle ] ,
+			action: [ 'style' , 'definitionTag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -761,7 +760,7 @@ const prog = {
 			]
 		} ,
 		endDefinitionTag: {
-			action: [ 'style' , definitionTagStyle ] ,
+			action: [ 'style' , 'definitionTag' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -772,7 +771,7 @@ const prog = {
 			]
 		} ,
 		definitionTagName: {
-			action: [ 'style' , definitionTagNameStyle ] ,
+			action: [ 'style' , 'definitionTagName' ] ,
 			span: 'tagName' ,
 			expandSpan: 'tag' ,
 			branches: [
@@ -788,7 +787,7 @@ const prog = {
 			]
 		} ,
 		afterDefinitionTagName: {
-			action: [ 'style' , definitionTagNameStyle ] ,
+			action: [ 'style' , 'definitionTagName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -810,7 +809,7 @@ const prog = {
 			]
 		} ,
 		definitionTagAttributesPart: {
-			action: [ 'style' , definitionTagNameStyle ] ,
+			action: [ 'style' , 'definitionTagName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -829,7 +828,7 @@ const prog = {
 			]
 		} ,
 		definitionTagAttributeName: {
-			action: [ 'style' , definitionTagAttributeNameStyle ] ,
+			action: [ 'style' , 'definitionTagAttributeName' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -851,7 +850,7 @@ const prog = {
 			]
 		} ,
 		definitionTagAttributeEqual: {
-			action: [ 'style' , operatorStyle ] ,
+			action: [ 'style' , 'operator' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -862,7 +861,7 @@ const prog = {
 			]
 		} ,
 		definitionTagAttributeValue: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			expandSpan: 'tag' ,
 			branches: [
 				{
@@ -877,7 +876,7 @@ const prog = {
 			]
 		} ,
 		openNestedDefinitionTag: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: true ,
@@ -888,10 +887,10 @@ const prog = {
 			]
 		} ,
 		closeNestedDefinitionTag: {
-			action: [ [ 'style' , definitionTagBracketStyle ] , [ 'openerStyle' , definitionTagBracketStyle ] ] ,
+			action: [ [ 'style' , 'definitionTagBracket' ] , [ 'openerStyle' , 'definitionTagBracket' ] ] ,
 			return: {
 				matchState: 'openNestedDefinitionTag' ,
-				errorAction: [ 'style' , parseErrorStyle ]
+				errorAction: [ 'style' , 'parseError' ]
 			} ,
 			branches: [
 				{
@@ -902,7 +901,7 @@ const prog = {
 			]
 		} ,
 		definitionTagError: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: '>' ,
@@ -917,7 +916,7 @@ const prog = {
 
 
 		doubleQuoteAttributeValue: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			branches: [
 				{
 					match: '\\' ,
@@ -936,7 +935,7 @@ const prog = {
 
 
 		escape: {
-			action: [ 'style' , escapeStyle ] ,
+			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
 					match: true ,

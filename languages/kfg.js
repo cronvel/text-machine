@@ -32,38 +32,6 @@
 
 
 
-const idleStyle = { color: 'white' } ;
-const keywordStyle = { color: 'brightWhite' , bold: true } ;
-const operatorStyle = { color: 'brightWhite' , bold: true } ;
-const assignmentStyle = { color: 'brightWhite' , bold: true } ;
-const thisStyle = { color: 'brightRed' , bold: true } ;
-const constantKeywordStyle = { color: 'brightBlue' , bold: true } ;
-const constantStyle = { color: 'brightBlue' } ;
-const identifierStyle = { color: 'red' } ;
-const numberStyle = { color: 'cyan' } ;
-const stringStyle = { color: 'blue' } ;
-const escapeStyle = { color: 'brightCyan' , bold: true } ;
-const templatePlaceholderStyle = { color: 'brightCyan' , bold: true } ;
-const commentStyle = { color: 'gray' } ;
-const propertyStyle = { color: 'green' } ;
-const methodStyle = { color: 'brightYellow' } ;
-const coreMethodStyle = { color: 'brightYellow' , bold: true } ;
-const classStyle = { color: 'magenta' } ;
-const constructorStyle = { color: 'magenta' } ;
-const coreClassOrObjectStyle = { color: 'brightMagenta' , bold: true } ;
-
-const regexpStyle = { color: 'blue' } ;
-const regexpDelemiterStyle = { color: 'brightMagenta' , bold: true } ;
-const regexpParenthesisStyle = { color: 'yellow' , bold: true } ;
-const regexpBracketStyle = { color: 'brightMagenta' , bold: true } ;
-const regexpAlternativeStyle = { color: 'yellow' , bold: true } ;
-const regexpMarkupStyle = { color: 'brightMagenta' } ;
-const regexpClassStyle = { color: 'cyan' } ;
-const regexpClassRangeStyle = { color: 'magenta' } ;
-const regexpFlagStyle = { color: 'green' } ;
-
-const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
-const braceStyle = { color: 'brightWhite' , bold: true } ;
 
 
 
@@ -81,9 +49,43 @@ const prog = {
 	config: {
 		initState: 'idle'
 	} ,
+	styles: {
+		idle: { color: 'white' } ,
+		keyword: { color: 'brightWhite' , bold: true } ,
+		operator: { color: 'brightWhite' , bold: true } ,
+		assignment: { color: 'brightWhite' , bold: true } ,
+		this: { color: 'brightRed' , bold: true } ,
+		constantKeyword: { color: 'brightBlue' , bold: true } ,
+		constant: { color: 'brightBlue' } ,
+		identifier: { color: 'red' } ,
+		number: { color: 'cyan' } ,
+		string: { color: 'blue' } ,
+		escape: { color: 'brightCyan' , bold: true } ,
+		templatePlaceholder: { color: 'brightCyan' , bold: true } ,
+		comment: { color: 'gray' } ,
+		property: { color: 'green' } ,
+		method: { color: 'brightYellow' } ,
+		coreMethod: { color: 'brightYellow' , bold: true } ,
+		class: { color: 'magenta' } ,
+		constructor: { color: 'magenta' } ,
+		coreClassOrObject: { color: 'brightMagenta' , bold: true } ,
+
+		regexp: { color: 'blue' } ,
+		regexpDelemiter: { color: 'brightMagenta' , bold: true } ,
+		regexpParenthesis: { color: 'yellow' , bold: true } ,
+		regexpBracket: { color: 'brightMagenta' , bold: true } ,
+		regexpAlternative: { color: 'yellow' , bold: true } ,
+		regexpMarkup: { color: 'brightMagenta' } ,
+		regexpClass: { color: 'cyan' } ,
+		regexpClassRange: { color: 'magenta' } ,
+		regexpFlag: { color: 'green' } ,
+
+		parseError: { color: 'brightWhite' , bgColor: 'red' , bold: true } ,
+		brace: { color: 'brightWhite' , bold: true } 
+	} ,
 	states: {
 		idle: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: /[ \t\n]/ ,
@@ -136,7 +138,7 @@ const prog = {
 			]
 		} ,
 		comment: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			branches: [
 				{
 					match: '\n' ,
@@ -145,7 +147,7 @@ const prog = {
 			]
 		} ,
 		maybeValueOrKey: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			span: 'key' ,
 			branches: [
 				{
@@ -160,7 +162,7 @@ const prog = {
                     spanBranches: [
                     	{
 							match: constantKeywords ,
-							action: [ 'spanStyle' , 'maybeValueOrKey' , constantKeywordStyle ] ,
+							action: [ 'spanStyle' , 'maybeValueOrKey' , 'constantKeyword' ] ,
 							state: 'idleAfterValue' ,
 							propagate: true
 						}
@@ -169,7 +171,7 @@ const prog = {
 			]
 		} ,
 		maybeValueOrKeyNotConstant: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			span: 'maybeValueOrKey' ,
 			branches: [
 				{
@@ -178,7 +180,7 @@ const prog = {
 				} ,
 				{
 					match: ':' ,
-					action: [ 'spanStyle' , propertyStyle ] ,
+					action: [ 'spanStyle' , 'property' ] ,
 					state: 'key'
 				} ,
 				{
@@ -193,7 +195,7 @@ const prog = {
 
 
 		escape: {
-			action: [ 'style' , escapeStyle ] ,
+			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
 					match: true ,

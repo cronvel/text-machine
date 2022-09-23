@@ -1,4 +1,10 @@
 
+v0.5.0
+------
+
+BREAKING: styles are now part of the exported program, and should be referenced by its name (property where it is stored inside program.styles), this will allow styles to be superseded by a text-editor (e.g.: have a common style for all identifiers across all supported languages, etc)
+
+
 v0.4.1
 ------
 

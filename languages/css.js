@@ -28,24 +28,7 @@
 
 
 
-/* A XML parser */
-
-
-
-const idleStyle = { color: 'white' } ;
-const operatorStyle = { color: 'brightWhite' , bold: true } ;
-
-const selectorStyle = { color: 'brightMagenta' , bold: true } ;
-
-const numberStyle = { color: 'cyan' } ;
-const entityStyle = { color: 'cyan' } ;
-const stringStyle = { color: 'blue' } ;
-const escapeStyle = { color: 'brightCyan' , bold: true } ;
-
-const commentStyle = { color: 'gray' } ;
-const propertyStyle = { color: 'green' } ;
-
-const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
+/* A CSS parser */
 
 
 
@@ -55,9 +38,25 @@ const prog = {
 	config: {
 		initState: 'idle'
 	} ,
+	styles: {
+		idle: { color: 'white' } ,
+		operator: { color: 'brightWhite' , bold: true } ,
+
+		selector: { color: 'brightMagenta' , bold: true } ,
+
+		number: { color: 'cyan' } ,
+		entity: { color: 'cyan' } ,
+		string: { color: 'blue' } ,
+		escape: { color: 'brightCyan' , bold: true } ,
+
+		comment: { color: 'gray' } ,
+		property: { color: 'green' } ,
+
+		parseError: { color: 'brightWhite' , bgColor: 'red' , bold: true }
+	} ,
 	states: {
 		idle: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: /[#.[\]=a-zA-Z0-9:_-]/ ,
@@ -71,7 +70,7 @@ const prog = {
 			]
 		} ,
 		selector: {
-			action: [ 'style' , selectorStyle ] ,
+			action: [ 'style' , 'selector' ] ,
 			branches: [
 				{
 					match: /[#.[\]=a-zA-Z0-9:_ \t\n-]/ ,
@@ -83,7 +82,7 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					action: [ 'style' , parseErrorStyle ] ,
+					action: [ 'style' , 'parseError' ] ,
 					state: 'idle'
 				}
 			]
@@ -92,7 +91,7 @@ const prog = {
 
 
 		declarationIdle: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9-]/ ,
@@ -114,7 +113,7 @@ const prog = {
 			]
 		} ,
 		declarationProperty: {
-			action: [ 'style' , propertyStyle ] ,
+			action: [ 'style' , 'property' ] ,
 			branches: [
 				{
 					match: /[a-zA-Z0-9-]/ ,
@@ -128,7 +127,7 @@ const prog = {
 			]
 		} ,
 		declarationAfterProperty: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: /[ \t\n]/ ,
@@ -145,7 +144,7 @@ const prog = {
 			]
 		} ,
 		declarationAfterColon: {
-			action: [ 'style' , operatorStyle ] ,
+			action: [ 'style' , 'operator' ] ,
 			branches: [
 				{
 					match: /[ \t\n]/ ,
@@ -159,7 +158,7 @@ const prog = {
 			]
 		} ,
 		declarationValue: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			branches: [
 				{
 					match: ';' ,
@@ -168,7 +167,7 @@ const prog = {
 			]
 		} ,
 		declarationError: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: '}' ,
@@ -183,7 +182,7 @@ const prog = {
 
 
 		doubleQuoteAttributeValue: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			branches: [
 				{
 					match: '\\' ,
@@ -202,7 +201,7 @@ const prog = {
 
 
 		escape: {
-			action: [ 'style' , escapeStyle ] ,
+			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
 					match: true ,

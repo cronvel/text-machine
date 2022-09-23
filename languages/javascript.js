@@ -28,42 +28,10 @@
 
 
 
-			/* A partial Javascript highlighter for Terminal-kit's TextBuffer */
+/* Javascript syntax highlighter */
 
 
 
-const idleStyle = { color: 'white' } ;
-const keywordStyle = { color: 'brightWhite' , bold: true } ;
-const operatorStyle = { color: 'brightWhite' , bold: true } ;
-const assignmentStyle = { color: 'brightWhite' , bold: true } ;
-const thisStyle = { color: 'brightRed' , bold: true } ;
-const constantKeywordStyle = { color: 'brightBlue' , bold: true } ;
-const constantStyle = { color: 'brightBlue' } ;
-const identifierStyle = { color: 'red' } ;
-const numberStyle = { color: 'cyan' } ;
-const stringStyle = { color: 'blue' } ;
-const escapeStyle = { color: 'brightCyan' , bold: true } ;
-const templatePlaceholderStyle = { color: 'brightCyan' , bold: true } ;
-const commentStyle = { color: 'gray' } ;
-const propertyStyle = { color: 'green' } ;
-const methodStyle = { color: 'brightYellow' } ;
-const coreMethodStyle = { color: 'brightYellow' , bold: true } ;
-const classStyle = { color: 'magenta' } ;
-const constructorStyle = { color: 'magenta' } ;
-const coreClassOrObjectStyle = { color: 'brightMagenta' , bold: true } ;
-
-const regexpStyle = { color: 'blue' } ;
-const regexpDelemiterStyle = { color: 'brightMagenta' , bold: true } ;
-const regexpParenthesisStyle = { color: 'yellow' , bold: true } ;
-const regexpBracketStyle = { color: 'brightMagenta' , bold: true } ;
-const regexpAlternativeStyle = { color: 'yellow' , bold: true } ;
-const regexpMarkupStyle = { color: 'brightMagenta' } ;
-const regexpClassStyle = { color: 'cyan' } ;
-const regexpClassRangeStyle = { color: 'magenta' } ;
-const regexpFlagStyle = { color: 'green' } ;
-
-const parseErrorStyle = { color: 'brightWhite' , bgColor: 'red' , bold: true } ;
-const braceStyle = { color: 'brightWhite' , bold: true } ;
 
 
 
@@ -153,9 +121,43 @@ const prog = {
 	config: {
 		initState: 'idle'
 	} ,
+	styles: {
+		idle: { color: 'white' } ,
+		keyword: { color: 'brightWhite' , bold: true } ,
+		operator: { color: 'brightWhite' , bold: true } ,
+		assignment: { color: 'brightWhite' , bold: true } ,
+		this: { color: 'brightRed' , bold: true } ,
+		constantKeyword: { color: 'brightBlue' , bold: true } ,
+		constant: { color: 'brightBlue' } ,
+		identifier: { color: 'red' } ,
+		number: { color: 'cyan' } ,
+		string: { color: 'blue' } ,
+		escape: { color: 'brightCyan' , bold: true } ,
+		templatePlaceholder: { color: 'brightCyan' , bold: true } ,
+		comment: { color: 'gray' } ,
+		property: { color: 'green' } ,
+		method: { color: 'brightYellow' } ,
+		coreMethod: { color: 'brightYellow' , bold: true } ,
+		class: { color: 'magenta' } ,
+		constructor: { color: 'magenta' } ,
+		coreClassOrObject: { color: 'brightMagenta' , bold: true } ,
+
+		regexp: { color: 'blue' } ,
+		regexpDelemiter: { color: 'brightMagenta' , bold: true } ,
+		regexpParenthesis: { color: 'yellow' , bold: true } ,
+		regexpBracket: { color: 'brightMagenta' , bold: true } ,
+		regexpAlternative: { color: 'yellow' , bold: true } ,
+		regexpMarkup: { color: 'brightMagenta' } ,
+		regexpClass: { color: 'cyan' } ,
+		regexpClassRange: { color: 'magenta' } ,
+		regexpFlag: { color: 'green' } ,
+
+		parseError: { color: 'brightWhite' , bgColor: 'red' , bold: true } ,
+		brace: { color: 'brightWhite' , bold: true }
+	} ,
 	states: {
 		idle: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: /[a-zA-Z_$]/ ,
@@ -218,7 +220,7 @@ const prog = {
 		// In the middle of an expression, after any constant/value/identifier/function call/etc...
 		// Mostly like idle, except that slash can be divide sign instead of RegExp
 		idleAfterValue: {
-			action: [ 'style' , idleStyle ] ,	// action when this state is active at the end of the event
+			action: [ 'style' , 'idle' ] ,	// action when this state is active at the end of the event
 			branches: [
 				{
 					match: '/' ,
@@ -236,7 +238,7 @@ const prog = {
 			]
 		} ,
 		number: {
-			action: [ 'style' , numberStyle ] ,
+			action: [ 'style' , 'number' ] ,
 			branches: [
 				{
 					match: /[0-9.]/ ,
@@ -250,7 +252,7 @@ const prog = {
 			]
 		} ,
 		identifier: {
-			action: [ 'style' , identifierStyle ] ,
+			action: [ 'style' , 'identifier' ] ,
 			span: 'identifier' ,
 			branches: [
 				{
@@ -267,46 +269,46 @@ const prog = {
 					spanBranches: [
 						{
 							match: 'this' ,
-							action: [ 'spanStyle' , 'identifier' , thisStyle ] ,
+							action: [ 'spanStyle' , 'identifier' , 'this' ] ,
 							state: 'afterIdentifier' ,
 							propagate: true
 						} ,
 						{
 							match: keywords ,
-							action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
+							action: [ 'spanStyle' , 'identifier' , 'keyword' ] ,
 							state: 'idle' ,
 							propagate: true
 						} ,
 						{
 							match: constantKeywords ,
-							action: [ 'spanStyle' , 'identifier' , constantKeywordStyle ] ,
+							action: [ 'spanStyle' , 'identifier' , 'constantKeyword' ] ,
 							state: 'idleAfterValue' ,
 							propagate: true
 						} ,
 						{
 							match: coreMethods ,
-							action: [ [ 'spanStyle' , 'identifier' , coreMethodStyle ] , [ 'hint' , coreMethodHints ] ] ,
+							action: [ [ 'spanStyle' , 'identifier' , 'coreMethod' ] , [ 'hint' , coreMethodHints ] ] ,
 							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 							state: 'idle' ,
 							propagate: true
 						} ,
 						{
 							match: coreClassesOrObjects ,
-							action: [ 'spanStyle' , 'identifier' , coreClassOrObjectStyle ] ,
+							action: [ 'spanStyle' , 'identifier' , 'coreClassOrObject' ] ,
 							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 							state: 'afterIdentifier' ,
 							propagate: true
 						} ,
 						{
 							match: /^[A-Z][A-Z0-9_]+$/ ,
-							action: [ 'spanStyle' , 'identifier' , constantStyle ] ,
+							action: [ 'spanStyle' , 'identifier' , 'constant' ] ,
 							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 							state: 'afterIdentifier' ,
 							propagate: true
 						} ,
 						{
 							match: /^[A-Z]/ ,
-							action: [ 'spanStyle' , 'identifier' , classStyle ] ,
+							action: [ 'spanStyle' , 'identifier' , 'class' ] ,
 							store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 							state: 'afterClass' ,
 							propagate: true
@@ -316,7 +318,7 @@ const prog = {
 			]
 		} ,
 		afterIdentifier: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: ' ' ,
@@ -333,13 +335,13 @@ const prog = {
 				} ,
 				{
 					match: ':' ,
-					action: [ 'spanStyle' , 'identifier' , propertyStyle ] ,
+					action: [ 'spanStyle' , 'identifier' , 'property' ] ,
 					state: 'colon'
 				} ,
 				{
 					match: '(' ,
 					subState: 'openParenthesis' ,
-					action: [ 'spanStyle' , 'identifier' , methodStyle ]
+					action: [ 'spanStyle' , 'identifier' , 'method' ]
 				} ,
 				{
 					match: true ,
@@ -349,7 +351,7 @@ const prog = {
 			]
 		} ,
 		afterClass: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: ' ' ,
@@ -358,7 +360,7 @@ const prog = {
 				{
 					match: '(' ,
 					subState: 'openParenthesis' ,
-					action: [ 'spanStyle' , 'identifier' , constructorStyle ]
+					action: [ 'spanStyle' , 'identifier' , 'constructor' ]
 				} ,
 				{
 					// Fallback to other afterIdentifier branches
@@ -369,7 +371,7 @@ const prog = {
 			]
 		} ,
 		dotAfterIdentifier: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: ' ' ,
@@ -387,7 +389,7 @@ const prog = {
 			]
 		} ,
 		member: {
-			action: [ 'style' , propertyStyle ] ,
+			action: [ 'style' , 'property' ] ,
 			span: 'identifier' ,
 			branches: [
 				{
@@ -404,7 +406,7 @@ const prog = {
 					spanBranches: [
 						{
 							match: specialMember ,
-							action: [ 'spanStyle' , 'identifier' , keywordStyle ] ,
+							action: [ 'spanStyle' , 'identifier' , 'keyword' ] ,
 							state: 'afterIdentifier' ,
 							propagate: true
 						}
@@ -416,7 +418,7 @@ const prog = {
 
 
 		operator: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			span: 'operator' ,
 			branches: [
 				{
@@ -432,20 +434,20 @@ const prog = {
 					spanBranches: [
 						{
 							match: '?' ,
-							action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
+							action: [ 'spanStyle' , 'operator' , 'operator' ] ,
 							state: 'idle' ,
 							microState: { ternary: true } ,
 							propagate: true
 						} ,
 						{
 							match: operators ,
-							action: [ 'spanStyle' , 'operator' , operatorStyle ] ,
+							action: [ 'spanStyle' , 'operator' , 'operator' ] ,
 							state: 'idle' ,
 							propagate: true
 						} ,
 						{
 							match: assignments ,
-							action: [ 'spanStyle' , 'operator' , assignmentStyle ] ,
+							action: [ 'spanStyle' , 'operator' , 'assignment' ] ,
 							state: 'idle' ,
 							propagate: true
 						}
@@ -454,7 +456,7 @@ const prog = {
 			]
 		} ,
 		colon: {
-			action: [ 'style' , operatorStyle ] ,
+			action: [ 'style' , 'operator' ] ,
 			microState: { ternary: false } ,
 			branches: [
 				{
@@ -471,7 +473,7 @@ const prog = {
 
 
 		singleQuoteString: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			branches: [
 				{
 					match: '\\' ,
@@ -485,7 +487,7 @@ const prog = {
 			]
 		} ,
 		doubleQuoteString: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			branches: [
 				{
 					match: '\\' ,
@@ -499,7 +501,7 @@ const prog = {
 			]
 		} ,
 		templateString: {
-			action: [ 'style' , stringStyle ] ,
+			action: [ 'style' , 'string' ] ,
 			branches: [
 				{
 					match: '\\' ,
@@ -518,7 +520,7 @@ const prog = {
 		} ,
 		templatePlaceholder: {
 			startSpan: true ,
-			action: [ 'style' , templatePlaceholderStyle ] ,
+			action: [ 'style' , 'templatePlaceholder' ] ,
 			branches: [
 				{
 					match: '{' ,
@@ -527,14 +529,14 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					action: [ 'spanStyle' , stringStyle ] ,
+					action: [ 'spanStyle' , 'string' ] ,
 					//clearSpan: true ,
 					state: 'templateString'
 				}
 			]
 		} ,
 		regexp: {
-			action: [ 'style' , regexpStyle ] ,
+			action: [ 'style' , 'regexp' ] ,
 			branches: [
 				{
 					match: '\\' ,
@@ -567,7 +569,7 @@ const prog = {
 			]
 		} ,
 		closeRegexp: {
-			action: [ 'style' , regexpDelemiterStyle ] ,
+			action: [ 'style' , 'regexpDelemiter' ] ,
 			branches: [
 				{
 					match: true ,
@@ -577,7 +579,7 @@ const prog = {
 			]
 		} ,
 		regexpFlag: {
-			action: [ 'style' , regexpFlagStyle ] ,
+			action: [ 'style' , 'regexpFlag' ] ,
 			branches: [
 				{
 					match: /[a-z]/ ,
@@ -591,7 +593,7 @@ const prog = {
 			]
 		} ,
 		regexpMarkup: {
-			action: [ 'style' , regexpMarkupStyle ] ,
+			action: [ 'style' , 'regexpMarkup' ] ,
 			branches: [
 				{
 					match: true ,
@@ -601,7 +603,7 @@ const prog = {
 			]
 		} ,
 		regexpAlternative: {
-			action: [ 'style' , regexpAlternativeStyle ] ,
+			action: [ 'style' , 'regexpAlternative' ] ,
 			branches: [
 				{
 					match: true ,
@@ -611,7 +613,7 @@ const prog = {
 			]
 		} ,
 		regexpOpenParenthesis: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: true ,
@@ -621,10 +623,10 @@ const prog = {
 			]
 		} ,
 		regexpCloseParenthesis: {
-			action: [ [ 'style' , regexpParenthesisStyle ] , [ 'openerStyle' , regexpParenthesisStyle ] ] ,
+			action: [ [ 'style' , 'regexpParenthesis' ] , [ 'openerStyle' , 'regexpParenthesis' ] ] ,
 			return: {
 				matchState: 'regexpOpenParenthesis' ,
-				errorAction: [ 'style' , parseErrorStyle ]
+				errorAction: [ 'style' , 'parseError' ]
 			} ,
 			branches: [
 				{
@@ -635,7 +637,7 @@ const prog = {
 			]
 		} ,
 		regexpOpenBracket: {
-			action: [ 'style' , regexpBracketStyle ] ,
+			action: [ 'style' , 'regexpBracket' ] ,
 			branches: [
 				{
 					match: true ,
@@ -645,7 +647,7 @@ const prog = {
 			]
 		} ,
 		regexpClass: {
-			action: [ 'style' , regexpClassStyle ] ,
+			action: [ 'style' , 'regexpClass' ] ,
 			branches: [
 				{
 					match: '\\' ,
@@ -662,7 +664,7 @@ const prog = {
 			]
 		} ,
 		regexpMaybeClassRange: {
-			action: [ 'style' , regexpClassStyle ] ,
+			action: [ 'style' , 'regexpClass' ] ,
 			branches: [
 				{
 					match: ']' ,
@@ -670,13 +672,13 @@ const prog = {
 				} ,
 				{
 					match: true ,
-					action: [ 'starterStyle' , regexpClassRangeStyle ] ,
+					action: [ 'starterStyle' , 'regexpClassRange' ] ,
 					state: 'regexpClass'
 				}
 			]
 		} ,
 		regexpCloseBracket: {
-			action: [ 'style' , regexpBracketStyle ] ,
+			action: [ 'style' , 'regexpBracket' ] ,
 			branches: [
 				{
 					match: true ,
@@ -689,7 +691,7 @@ const prog = {
 
 
 		openBrace: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: true ,
@@ -699,10 +701,10 @@ const prog = {
 			]
 		} ,
 		closeBrace: {
-			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
+			action: [ [ 'style' , 'brace' ] , [ 'openerStyle' , 'brace' ] ] ,
 			return: {
 				matchState: 'openBrace' ,
-				errorAction: [ 'style' , parseErrorStyle ]
+				errorAction: [ 'style' , 'parseError' ]
 			} ,
 			branches: [
 				{
@@ -713,7 +715,7 @@ const prog = {
 			]
 		} ,
 		openBracket: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: true ,
@@ -723,10 +725,10 @@ const prog = {
 			]
 		} ,
 		closeBracket: {
-			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
+			action: [ [ 'style' , 'brace' ] , [ 'openerStyle' , 'brace' ] ] ,
 			return: {
 				matchState: 'openBracket' ,
-				errorAction: [ 'style' , parseErrorStyle ]
+				errorAction: [ 'style' , 'parseError' ]
 			} ,
 			branches: [
 				{
@@ -737,7 +739,7 @@ const prog = {
 			]
 		} ,
 		openParenthesis: {
-			action: [ 'style' , parseErrorStyle ] ,
+			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
 					match: true ,
@@ -747,10 +749,10 @@ const prog = {
 			]
 		} ,
 		closeParenthesis: {
-			action: [ [ 'style' , braceStyle ] , [ 'openerStyle' , braceStyle ] ] ,
+			action: [ [ 'style' , 'brace' ] , [ 'openerStyle' , 'brace' ] ] ,
 			return: {
 				matchState: 'openParenthesis' ,
-				errorAction: [ 'style' , parseErrorStyle ]
+				errorAction: [ 'style' , 'parseError' ]
 			} ,
 			branches: [
 				{
@@ -764,38 +766,38 @@ const prog = {
 
 
 		idleSlash: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: '/' ,
 					state: 'lineComment' ,
-					action: [ 'streakStyle' , commentStyle ]
+					action: [ 'streakStyle' , 'comment' ]
 				} ,
 				{
 					match: '*' ,
 					state: 'multiLineComment' ,
-					action: [ 'streakStyle' , commentStyle ]
+					action: [ 'streakStyle' , 'comment' ]
 				} ,
 				{
 					match: true ,
 					state: 'regexp' ,
 					propagate: true ,
-					action: [ 'streakStyle' , regexpDelemiterStyle ]
+					action: [ 'streakStyle' , 'regexpDelemiter' ]
 				}
 			]
 		} ,
 		idleAfterValueSlash: {
-			action: [ 'style' , idleStyle ] ,
+			action: [ 'style' , 'idle' ] ,
 			branches: [
 				{
 					match: '/' ,
 					state: 'lineComment' ,
-					action: [ 'streakStyle' , commentStyle ]
+					action: [ 'streakStyle' , 'comment' ]
 				} ,
 				{
 					match: '*' ,
 					state: 'multiLineComment' ,
-					action: [ 'streakStyle' , commentStyle ]
+					action: [ 'streakStyle' , 'comment' ]
 				} ,
 				{
 					match: true ,
@@ -804,7 +806,7 @@ const prog = {
 			]
 		} ,
 		lineComment: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			branches: [
 				{
 					match: '\n' ,
@@ -813,7 +815,7 @@ const prog = {
 			]
 		} ,
 		multiLineComment: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			branches: [
 				{
 					match: '*' ,
@@ -822,7 +824,7 @@ const prog = {
 			]
 		} ,
 		multiLineCommentAsterisk: {
-			action: [ 'style' , commentStyle ] ,
+			action: [ 'style' , 'comment' ] ,
 			branches: [
 				{
 					match: '/' ,
@@ -843,7 +845,7 @@ const prog = {
 
 
 		escape: {
-			action: [ 'style' , escapeStyle ] ,
+			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
 					match: true ,
