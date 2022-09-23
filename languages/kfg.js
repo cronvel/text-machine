@@ -55,6 +55,8 @@ const prog = {
 		operator: { color: 'brightWhite' , bold: true } ,
 		repetition: { color: 'brightYellow' } ,
 		property: { color: 'green' } ,
+		stringMapKey: { color: 'brightGreen' } ,
+		stringMapValue: { color: 'brightBlue' } ,
 
 		constantKeyword: { color: 'brightBlue' , bold: true } ,
 
@@ -148,13 +150,12 @@ const prog = {
 				} ,
 				{
 					match: '<' ,
-					state: 'maybeClassOrMapKey'
+					state: 'maybeOpenClassOrMapKey'
 				} ,
 				{
 					match: ':' ,
 					action: [ 'style' , 'operator' ] ,
-					state: 'maybeMapValue' ,
-					transition: true
+					state: 'maybeMapValueIntroducer'
 				} ,
 				{
 					match: '"' ,
@@ -552,6 +553,34 @@ const prog = {
 
 
 
+		maybeOpenClassOrMapKey: {
+			action: [ 'style' , 'classMark' ] ,
+			span: 'class' ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'class' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: ':' ,
+					action: [ 'spanStyle' , 'class' , 'operator' ] ,
+					state: 'mapKeyIntroducer'
+				} ,
+				{
+					match: '<' ,
+					action: [ 'spanStyle' , 'class' , 'operator' ] ,
+					state: 'maybeMapKeyMultiLineIntroducer'
+				} ,
+				{
+					match: '>' ,
+					state: 'lineError'
+				} ,
+				{
+					state: 'class'
+				}
+			]
+		} ,
 		openClass: {
 			action: [ 'style' , 'classMark' ] ,
 			span: 'class' ,
@@ -695,7 +724,8 @@ const prog = {
 					spanBranches: [
                     	{
 							match: constantKeywords ,
-							action: [ 'spanStyle' , 'unquotedValue' , 'constantKeyword' ]
+							action: [ 'spanStyle' , 'unquotedValue' , 'constantKeyword' ] ,
+							state: 'idle'
 						}
 					]
 				} ,
@@ -784,10 +814,170 @@ const prog = {
 
 
 
+		mapKeyIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterKey'
+				}
+			]
+		} ,
+		maybeMapKeyMultiLineIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'class' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: ':' ,
+					state: 'stringMapKeyIntroducer'
+				} ,
+				{
+					match: '<' ,
+					state: 'maybeMapKeyMultiLineFoldedIntroducer'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		maybeMapKeyMultiLineFoldedIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'class' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: ':' ,
+					state: 'stringMapKeyIntroducer'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		stringMapKeyIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'introducedStringMapKey'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		introducedStringMapKey: {
+			action: [ 'style' , 'stringMapKey' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				}
+			]
+		} ,
+
+
+		maybeMapValueIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'class' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: '>' ,
+					state: 'mapValueIntroducer'
+				}
+			]
+		} ,
+		mapValueIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: '>' ,
+					state: 'mapValueMultiLineIntroducer'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterKey'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		mapValueMultiLineIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: '>' ,
+					state: 'mapValueMultiLineFoldedIntroducer'
+				} ,
+				{
+					match: ' ' ,
+					state: 'introducedStringMapValue'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		mapValueMultiLineFoldedIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'introducedStringMapValue'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		introducedStringMapValue: {
+			action: [ 'style' , 'stringMapValue' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				}
+			]
+		} ,
+
+
+
 		/*
 			MISSING from JOE state-machine:
 
-			*section* *tag* *map* *include* *include* *ref* *expression*
+			*section* *tag* *include* *ref* *expression*
 			*template* *introduced*template* *doublequote*key* *doublequote*string* *doublequote*template*
 			hexadecimal numbers
 			
