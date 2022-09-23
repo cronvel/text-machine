@@ -51,22 +51,33 @@ const prog = {
 	} ,
 	styles: {
 		idle: { color: 'white' } ,
-		keyword: { color: 'brightWhite' , bold: true } ,
+
 		operator: { color: 'brightWhite' , bold: true } ,
-		assignment: { color: 'brightWhite' , bold: true } ,
-		this: { color: 'brightRed' , bold: true } ,
+		repetition: { color: 'brightYellow' } ,
+		property: { color: 'green' } ,
+
 		constantKeyword: { color: 'brightBlue' , bold: true } ,
-		constant: { color: 'brightBlue' } ,
-		identifier: { color: 'red' } ,
+
+		kfgOperatorMark: { color: 'brightRed' } ,
+		kfgOperator: { color: 'red' } ,
+		classMark: { color: 'brightMagenta' } ,
+		class: { color: 'magenta' } ,
+
 		number: { color: 'cyan' } ,
 		string: { color: 'blue' } ,
+
+		comment: { color: 'gray' } ,
+
+
+
+		keyword: { color: 'brightWhite' , bold: true } ,
+		assignment: { color: 'brightWhite' , bold: true } ,
+		constant: { color: 'brightBlue' } ,
+		identifier: { color: 'red' } ,
 		escape: { color: 'brightCyan' , bold: true } ,
 		templatePlaceholder: { color: 'brightCyan' , bold: true } ,
-		comment: { color: 'gray' } ,
-		property: { color: 'green' } ,
 		method: { color: 'brightYellow' } ,
 		coreMethod: { color: 'brightYellow' , bold: true } ,
-		class: { color: 'magenta' } ,
 		constructor: { color: 'magenta' } ,
 		coreClassOrObject: { color: 'brightMagenta' , bold: true } ,
 
@@ -141,18 +152,22 @@ const prog = {
 				} ,
 				{
 					match: ':' ,
-					state: 'maybeMapValue'
+					action: [ 'style' , 'operator' ] ,
+					state: 'maybeMapValue' ,
+					transition: true
 				} ,
 				{
 					match: '"' ,
 					state: 'maybeValueOrDoubleQuotedKey'
 				} ,
 				{
-					match: true ,
 					state: 'maybeValueOrKey'
 				}
 			]
 		} ,
+
+
+
 		comment: {
 			action: [ 'style' , 'comment' ] ,
 			branches: [
@@ -162,6 +177,9 @@ const prog = {
 				}
 			]
 		} ,
+
+
+
 		maybeValueOrKey: {
 			action: [ 'style' , 'idle' ] ,
 			span: 'maybeValueOrKey' ,
@@ -171,24 +189,30 @@ const prog = {
 					state: 'maybeValueOrKey'
 				} ,
 				{
-					match: true ,
-					state: 'maybeValueOrKeyNotConstant' ,
-					propagate: true ,
+					match: ':' ,
+					action: [ [ 'style' , 'operator' ] , [ 'spanStyle' , 'maybeValueOrKey' , 'property' ] ] ,
+					state: 'afterKey' ,
+					transition: true
+				} ,
+				{
+					match: '\n' ,
+					state: 'idle' ,
 					
 					branchOn: 'maybeValueOrKey' ,
                     spanBranches: [
                     	{
 							match: constantKeywords ,
 							action: [ 'spanStyle' , 'maybeValueOrKey' , 'constantKeyword' ] ,
-							state: 'idleAfterValue' ,
-							propagate: true
+							state: 'idle'
 						}
                     ]
+				} ,
+				{
+					state: 'maybeValueOrKeyNotConstant'
 				}
 			]
 		} ,
 		maybeValueOrKeyNotConstant: {
-			action: [ 'style' , 'idle' ] ,
 			span: 'maybeValueOrKey' ,
 			branches: [
 				{
@@ -197,13 +221,579 @@ const prog = {
 				} ,
 				{
 					match: ':' ,
-					action: [ 'spanStyle' , 'maybeValueOrKey' , 'property' ] ,
+					action: [ [ 'style' , 'operator' ] , [ 'spanStyle' , 'maybeValueOrKey' , 'property' ] ] ,
+					state: 'afterKey' ,
+					transition: true
+				}
+			]
+		} ,
+		afterKey: {
+			action: [ 'style' , 'idle' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
 					state: 'afterKey'
+				} ,
+				{
+					match: '(' ,
+					state: 'openOperator'
+				} ,
+				{
+					match: '@' ,
+					state: 'includeMark'
+				} ,
+				{
+					match: '<' ,
+					state: 'openClass'
+				} ,
+				{
+					match: '>' ,
+					state: 'stringIntroducer'
+				} ,
+				{
+					match: '$' ,
+					state: 'maybeTemplate'
+				} ,
+				{
+					match: '"' ,
+					state: 'doubleQuotedValue'
+				} ,
+				{
+					state: 'unquotedValue' ,
+					propagate: true
 				}
 			]
 		} ,
 
 
+
+		item: {
+			action: [ 'style' , 'operator' ] ,
+			span: 'itemMark' ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: '\t' ,
+					state: 'compactList'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterItem'
+				} ,
+				{
+					match: '-' ,
+					state: 'maybeSection'
+				} ,
+				{
+					match: /[0-9]/ ,
+					state: 'itemRepetition'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		itemRepetition: {
+			action: [ 'style' , 'repetition' ] ,
+			span: 'itemMark' ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'itemMark' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: /[0-9]/ ,
+					state: 'itemRepetition'
+				} ,
+				{
+					match: 'x' ,
+					action: [ 'style' , 'repetition' ] ,
+					state: 'afterItemRepetition' ,
+					delay: true
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		afterItem: {
+			action: [ 'style' , 'idle' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterItem'
+				} ,
+				{
+					match: '\t' ,
+					state: 'compactList'
+				} ,
+				{
+					match: '(' ,
+					state: 'openOperator'
+				} ,
+				{
+					match: '<' ,
+					state: 'openClass'
+				} ,
+				{
+					match: '>' ,
+					state: 'stringIntroducer'
+				} ,
+				{
+					match: '$' ,
+					state: 'maybeTemplate'
+				} ,
+				{
+					match: '@' ,
+					state: 'includeMark'
+				} ,
+				{
+					match: '"' ,
+					state: 'doubleQuotedValue'
+				} ,
+				{
+					state: 'unquotedValue' ,
+					propagate: true
+				}
+			]
+		} ,
+		afterItemRepetition: {
+			// Same than 'afterItem', but without compact-list
+			action: [ 'style' , 'idle' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterItemRepetition'
+				} ,
+				{
+					match: '(' ,
+					state: 'openOperator'
+				} ,
+				{
+					match: '<' ,
+					state: 'openClass'
+				} ,
+				{
+					match: '>' ,
+					state: 'stringIntroducer'
+				} ,
+				{
+					match: '$' ,
+					state: 'maybeTemplate'
+				} ,
+				{
+					match: '@' ,
+					state: 'includeMark'
+				} ,
+				{
+					match: '"' ,
+					state: 'doubleQuotedValue'
+				} ,
+				{
+					state: 'unquotedValue' ,
+					propagate: true
+				}
+			]
+		} ,
+		compactList: {
+			action: [ 'style' , 'idle' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterItem'
+				} ,
+				{
+					match: '\t' ,
+					state: 'lineError'
+				} ,
+				{
+					match: '(' ,
+					state: 'openOperator'
+				} ,
+				{
+					match: '-' ,
+					state: 'item'
+				} ,
+				{
+					match: '<' ,
+					state: 'openClass'
+				} ,
+				{
+					match: '>' ,
+					state: 'stringIntroducer'
+				} ,
+				{
+					match: '$' ,
+					state: 'maybeTemplate'
+				} ,
+				{
+					match: '@' ,
+					state: 'includeMark'
+				} ,
+				{
+					match: '"' ,
+					state: 'doubleQuotedValue'
+				} ,
+				{
+					state: 'maybeValueOrKey'
+				}
+			]
+		} ,
+		
+		
+		
+		openOperator: {
+			action: [ 'style' , 'kfgOperatorMark' ] ,
+			span: 'operator' ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'operator' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: ')' ,
+					state: 'lineError'
+				} ,
+				{
+					state: 'operator'
+				}
+			]
+		} ,
+		operator: {
+			action: [ 'style' , 'kfgOperator' ] ,
+			span: 'operator' ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'operator' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: ')' ,
+					state: 'closeOperator' ,
+				}
+			]
+		} ,
+		closeOperator: {
+			action: [ 'style' , 'kfgOperatorMark' ] ,
+			span: 'operator' ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterOperator' ,
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		afterOperator: {
+			action: [ 'style' , 'idle' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterOperator'
+				} ,
+				{
+					match: '<' ,
+					state: 'openClass'
+				} ,
+				{
+					match: '>' ,
+					state: 'stringIntroducer'
+				} ,
+				{
+					match: '$' ,
+					state: 'maybeTemplate'
+				} ,
+				{
+					match: '@' ,
+					state: 'includeMark'
+				} ,
+				{
+					match: '"' ,
+					state: 'doubleQuotedValue'
+				} ,
+				{
+					state: 'unquotedValue' ,
+					propagate: true
+				}
+			]
+		} ,
+
+
+
+		openClass: {
+			action: [ 'style' , 'classMark' ] ,
+			span: 'class' ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'class' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: '>' ,
+					state: 'lineError'
+				} ,
+				{
+					state: 'class'
+				}
+			]
+		} ,
+		class: {
+			action: [ 'style' , 'class' ] ,
+			span: 'class' ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'class' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: '>' ,
+					state: 'closeClass'
+				}
+			]
+		} ,
+		closeClass: {
+			action: [ 'style' , 'classMark' ] ,
+			span: 'class' ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterClass' ,
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		afterClass: {
+			action: [ 'style' , 'idle' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: ' ' ,
+					state: 'afterClass'
+				} ,
+				{
+					match: '>' ,
+					state: 'stringIntroducer'
+				} ,
+				{
+					match: '$' ,
+					state: 'maybeTemplate'
+				} ,
+				{
+					match: '@' ,
+					state: 'includeMark'
+				} ,
+				{
+					match: '"' ,
+					state: 'doubleQuotedValue'
+				} ,
+				{
+					state: 'unquotedValue' ,
+					propagate: true
+				}
+			]
+		} ,
+
+
+
+		unquotedValue: {
+			action: [ 'style' , 'string' ] ,
+			span: 'unquotedValue' ,
+			branches: [
+				{
+					// Could be a negative number or -Infinity
+					match: '-' ,
+					state: 'unquotedMinusValue'
+				} ,
+				{
+					match: /[a-zA-Z]/ ,
+					state: 'unquotedStringOrConstant'
+				} ,
+				{
+					match: /[0-9]/ ,
+					action: [ 'spanStyle' , 'unquotedValue' , 'number' ] ,
+					state: 'number' ,
+				} ,
+				{
+					state: 'unquotedString' ,
+				}
+			]
+		} ,
+		unquotedMinusValue: {
+			action: [ 'style' , 'string' ] ,
+			span: 'unquotedValue' ,
+			branches: [
+				{
+					match: /[a-zA-Z]/ ,
+					state: 'unquotedStringOrConstant'
+				} ,
+				{
+					match: /[0-9]/ ,
+					action: [ 'spanStyle' , 'unquotedValue' , 'number' ] ,
+					state: 'number' ,
+				} ,
+				{
+					state: 'unquotedString' ,
+				}
+			]
+		} ,
+		unquotedStringOrConstant: {
+			action: [ 'style' , 'string' ] ,
+			span: 'unquotedValue' ,
+			branches: [
+				{
+					match: /[a-zA-Z]/ ,
+					state: 'unquotedStringOrConstant'
+				} ,
+				{
+					match: '\n' ,
+					state: 'idle' ,
+					
+					branchOn: 'unquotedValue' ,
+					spanBranches: [
+                    	{
+							match: constantKeywords ,
+							action: [ 'spanStyle' , 'unquotedValue' , 'constantKeyword' ]
+						}
+					]
+				} ,
+				{
+					state: 'unquotedString'
+				}
+			]
+		} ,
+		unquotedString: {
+			action: [ 'style' , 'string' ] ,
+			span: 'unquotedValue' ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				}
+			]
+		} ,
+		number: {
+			action: [ 'style' , 'number' ] ,
+			span: 'unquotedValue' ,
+			branches: [
+				{
+					match: /[0-9eE]/ ,
+					state: 'number'
+				} ,
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+
+
+
+		stringIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: '>' ,
+					state: 'stringFoldedIntroducer'
+				} ,
+				{
+					match: ' ' ,
+					state: 'introducedString' ,
+					transition: true
+				} ,
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		stringFoldedIntroducer: {
+			action: [ 'style' , 'operator' ] ,
+			branches: [
+				{
+					match: ' ' ,
+					state: 'introducedString' ,
+					transition: true
+				} ,
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		introducedString: {
+			action: [ 'style' , 'string' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				}
+			]
+		} ,
+
+
+
+		/*
+			MISSING from JOE state-machine:
+
+			*section* *tag* *map* *include* *include* *ref* *expression*
+			*template* *introduced*template* *doublequote*key* *doublequote*string* *doublequote*template*
+			hexadecimal numbers
+			
+			MISSING (other):
+			Inline LXON
+		*/
 
 
 
@@ -211,10 +801,33 @@ const prog = {
 			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
-					match: true ,
 					return: true ,
 					state: 'idle' ,		// This is ignored if the current state can return
 					delay: true
+				}
+			]
+		} ,
+		
+		
+		
+		endOfLine: {
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					state: 'lineError'
+				}
+			]
+		} ,
+		lineError: {
+			// This is a bad line, styled with parseError until the end of it
+			action: [ 'style' , 'parseError' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					state: 'idle'
 				}
 			]
 		}

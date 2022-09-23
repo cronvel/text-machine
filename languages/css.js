@@ -81,7 +81,6 @@ const prog = {
 					state: 'declarationIdle'
 				} ,
 				{
-					match: true ,
 					action: [ 'style' , 'parseError' ] ,
 					state: 'idle'
 				}
@@ -107,7 +106,6 @@ const prog = {
 					state: 'declarationIdle'
 				} ,
 				{
-					match: true ,
 					state: 'declarationError'
 				}
 			]
@@ -120,7 +118,6 @@ const prog = {
 					state: 'declarationProperty' ,
 				} ,
 				{
-					match: true ,
 					state: 'declarationAfterProperty' ,
 					propagate: true
 				}
@@ -138,7 +135,6 @@ const prog = {
 					state: 'declarationAfterColon'
 				} ,
 				{
-					match: true ,
 					state: 'declarationError'
 				}
 			]
@@ -151,7 +147,6 @@ const prog = {
 					state: 'declarationAfterColon' ,
 				} ,
 				{
-					match: true ,
 					state: 'declarationValue' ,
 					propagate: true
 				}
@@ -204,7 +199,6 @@ const prog = {
 			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
-					match: true ,
 					return: true ,
 					state: 'idle' ,		// This is ignored if the current state can return
 					delay: true

@@ -231,7 +231,6 @@ const prog = {
 					state: 'idleAfterValue'
 				} ,
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -245,7 +244,6 @@ const prog = {
 					state: 'number'
 				} ,
 				{
-					match: true ,
 					state: 'idleAfterValue' ,
 					propagate: true
 				}
@@ -260,7 +258,6 @@ const prog = {
 					state: 'identifier'
 				} ,
 				{
-					match: true ,
 					store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
@@ -344,7 +341,6 @@ const prog = {
 					action: [ 'spanStyle' , 'identifier' , 'method' ]
 				} ,
 				{
-					match: true ,
 					state: 'idleAfterValue' ,
 					propagate: true
 				}
@@ -364,7 +360,6 @@ const prog = {
 				} ,
 				{
 					// Fallback to other afterIdentifier branches
-					match: true ,
 					state: 'afterIdentifier' ,
 					propagate: true
 				}
@@ -382,7 +377,6 @@ const prog = {
 					state: 'member'
 				} ,
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -397,7 +391,6 @@ const prog = {
 					state: 'member'
 				} ,
 				{
-					match: true ,
 					store: [ 'autoCompletion' , [ 'span' , 'identifier' ] ] ,
 					state: 'afterIdentifier' ,
 					propagate: true ,
@@ -426,7 +419,6 @@ const prog = {
 					state: 'operator'
 				} ,
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true ,
 
@@ -460,7 +452,6 @@ const prog = {
 			microState: { ternary: false } ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -528,7 +519,6 @@ const prog = {
 					state: 'templateString'
 				} ,
 				{
-					match: true ,
 					action: [ 'spanStyle' , 'string' ] ,
 					//clearSpan: true ,
 					state: 'templateString'
@@ -572,7 +562,6 @@ const prog = {
 			action: [ 'style' , 'regexpDelemiter' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'regexpFlag' ,
 					propagate: true
 				}
@@ -586,7 +575,6 @@ const prog = {
 					state: 'regexpFlag'
 				} ,
 				{
-					match: true ,
 					state: 'idleAfterValue' ,
 					propagate: true
 				}
@@ -596,7 +584,6 @@ const prog = {
 			action: [ 'style' , 'regexpMarkup' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'regexp' ,
 					propagate: true
 				}
@@ -606,7 +593,6 @@ const prog = {
 			action: [ 'style' , 'regexpAlternative' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'regexp' ,
 					propagate: true
 				}
@@ -616,7 +602,6 @@ const prog = {
 			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'regexp' ,
 					propagate: true
 				}
@@ -630,7 +615,6 @@ const prog = {
 			} ,
 			branches: [
 				{
-					match: true ,
 					state: 'regexp' ,
 					propagate: true
 				}
@@ -640,7 +624,6 @@ const prog = {
 			action: [ 'style' , 'regexpBracket' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'regexpClass' ,
 					propagate: true
 				}
@@ -671,7 +654,6 @@ const prog = {
 					state: 'regexpCloseBracket'
 				} ,
 				{
-					match: true ,
 					action: [ 'starterStyle' , 'regexpClassRange' ] ,
 					state: 'regexpClass'
 				}
@@ -681,7 +663,6 @@ const prog = {
 			action: [ 'style' , 'regexpBracket' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'regexp' ,
 					propagate: true
 				}
@@ -694,7 +675,6 @@ const prog = {
 			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -708,7 +688,6 @@ const prog = {
 			} ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -718,7 +697,6 @@ const prog = {
 			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -732,7 +710,6 @@ const prog = {
 			} ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -742,7 +719,6 @@ const prog = {
 			action: [ 'style' , 'parseError' ] ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -756,7 +732,6 @@ const prog = {
 			} ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -779,7 +754,6 @@ const prog = {
 					action: [ 'streakStyle' , 'comment' ]
 				} ,
 				{
-					match: true ,
 					state: 'regexp' ,
 					propagate: true ,
 					action: [ 'streakStyle' , 'regexpDelemiter' ]
@@ -800,7 +774,6 @@ const prog = {
 					action: [ 'streakStyle' , 'comment' ]
 				} ,
 				{
-					match: true ,
 					state: 'idle'
 				}
 			]
@@ -832,7 +805,6 @@ const prog = {
 					delay: true
 				} ,
 				{
-					match: true ,
 					state: 'multiLineComment' ,
 					propagate: true
 				}
@@ -848,7 +820,6 @@ const prog = {
 			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
-					match: true ,
 					return: true ,
 					state: 'idle' ,		// This is ignored if the current state can return
 					delay: true

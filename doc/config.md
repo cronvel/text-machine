@@ -74,6 +74,8 @@ MAYBE:
 * propagate: `boolean` if set, the event-character is issued again after the state have changed,
   i.e. the matching character is not eaten is re-used by the new state.
 * delay: `boolean` if set, the action of the state before branching will be used this time, instead of those of the new state.
+* transition: `boolean` like delay the new state's actions are not applied, but neither are the former state's actions, only the branch's actions are applied.
+  This property is useful to avoid creating a state that will immediately change to another.
 
 MAYBE:
 * overide: `boolean` if set, the branch's action replace the next state's action once.

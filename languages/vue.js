@@ -87,7 +87,6 @@ const prog = {
 					state: 'entityName'
 				} ,
 				{
-					match: true ,
 					action: [ 'streakStyle' , 'parseError' ] ,
 					state: 'idle' ,
 					propagate: true
@@ -107,7 +106,6 @@ const prog = {
 					delay: true
 				} ,
 				{
-					match: true ,
 					action: [ 'streakStyle' , 'parseError' ] ,
 					state: 'idle' ,
 					propagate: true
@@ -131,7 +129,6 @@ const prog = {
 					state: 'maybeComment'
 				} ,
 				{
-					match: true ,
 					state: 'openTag' ,
 					propagate: true
 				}
@@ -143,7 +140,6 @@ const prog = {
 			expandSpan: 'tag' ,
 			branches: [
 				{
-					match: true ,
 					state: 'openTagName' ,
 					propagate: true
 				}
@@ -159,7 +155,6 @@ const prog = {
 					state: 'openTagName'
 				} ,
 				{
-					match: true ,
 					state: 'afterOpenTagName' ,
 					microState: { openTag: [ 'span' , 'tagName' ] } ,
 					propagate: true
@@ -183,7 +178,6 @@ const prog = {
 					state: 'openTagAttributesPart'
 				} ,
 				{
-					match: true ,
 					state: 'openTagError'
 				}
 			]
@@ -197,7 +191,6 @@ const prog = {
 					state: 'endSelfClosingTag'
 				} ,
 				{
-					match: true ,
 					state: 'openTagAttributesPart' ,
 					propagate: true
 				}
@@ -208,7 +201,6 @@ const prog = {
 			expandSpan: 'tag' ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -219,7 +211,6 @@ const prog = {
 			expandSpan: 'tag' ,
 			branches: [
 				{
-					match: true ,
 					subState: 'openTagContent' ,
 					state: 'idle' ,
 					propagate: true ,
@@ -247,7 +238,6 @@ const prog = {
 		openTagContent: {
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -299,7 +289,6 @@ const prog = {
 			expandSpan: 'tag' ,
 			branches: [
 				{
-					match: true ,
 					state: 'openTagAttributeValue' ,
 					propagate: true
 				}
@@ -345,7 +334,6 @@ const prog = {
 			expandSpan: 'tag' ,
 			branches: [
 				{
-					match: true ,
 					state: 'closeTagName' ,
 					propagate: true
 				}
@@ -361,7 +349,6 @@ const prog = {
 					state: 'closeTagName'
 				} ,
 				{
-					match: true ,
 					state: 'afterCloseTagName' ,
 					microState: { closeTag: [ 'span' , 'tagName' ] } ,
 					propagate: true
@@ -381,7 +368,6 @@ const prog = {
 					state: 'endCloseTag'
 				} ,
 				{
-					match: true ,
 					state: 'closeTagError'
 				}
 			]
@@ -397,7 +383,6 @@ const prog = {
 			} ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -427,7 +412,6 @@ const prog = {
 					state: 'maybeComment2'
 				} ,
 				{
-					match: true ,
 					state: 'openTagError' ,
 					propagate: true
 				}
@@ -443,7 +427,6 @@ const prog = {
 					state: 'comment' ,
 				} ,
 				{
-					match: true ,
 					state: 'openTagError' ,
 					propagate: true
 				}
@@ -468,7 +451,6 @@ const prog = {
 					state: 'maybeEndComment2'
 				} ,
 				{
-					match: true ,
 					state: 'comment' ,
 					propagate: true
 				}
@@ -487,7 +469,6 @@ const prog = {
 					state: 'maybeEndComment2'
 				} ,
 				{
-					match: true ,
 					state: 'comment' ,
 					propagate: true
 				}
@@ -498,7 +479,6 @@ const prog = {
 			span: 'tag' ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -512,7 +492,6 @@ const prog = {
 		openEmbedded: {
 			branches: [
 				{
-					match: true ,
 					state: 'embedded' ,
 					embedded: [ 'parent' , 'microState' , 'embedded' ] ,
 					propagate: true
@@ -536,7 +515,6 @@ const prog = {
 					state: 'maybeEmbeddedCloseTag2'
 				} ,
 				{
-					match: true ,
 					state: 'embedded' ,
 					propagate: true
 				}
@@ -547,7 +525,6 @@ const prog = {
 			expandSpan: 'embeddedTag' ,
 			branches: [
 				{
-					match: true ,
 					embedded: null ,
 					state: 'embeddedCloseTagName' ,
 					action: [ 'spanStyle' , 'embeddedTag' , 'tag' ] ,
@@ -565,7 +542,6 @@ const prog = {
 					state: 'embeddedCloseTagName'
 				} ,
 				{
-					match: true ,
 					state: 'afterEmbeddedCloseTagName' ,
 					microState: { closeTag: [ 'span' , 'embeddedCloseTagName' ] } ,
 					propagate: true
@@ -585,7 +561,6 @@ const prog = {
 					state: 'endEmbeddedCloseTag'
 				} ,
 				{
-					match: true ,
 					state: 'embedded'
 				}
 			]
@@ -601,7 +576,6 @@ const prog = {
 			} ,
 			branches: [
 				{
-					match: true ,
 					state: 'idle' ,
 					propagate: true
 				}
@@ -636,7 +610,6 @@ const prog = {
 			action: [ 'style' , 'escape' ] ,
 			branches: [
 				{
-					match: true ,
 					return: true ,
 					state: 'idle' ,		// This is ignored if the current state can return
 					delay: true

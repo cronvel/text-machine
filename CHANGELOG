@@ -1,4 +1,12 @@
 
+v0.5.1
+------
+
+Setting property 'match' in branches is now optional (no match property = always match)
+New: 'transition' property, similar to delay, but do not even apply former state's actions
+KFG improved (50% done)
+
+
 v0.5.0
 ------
 
