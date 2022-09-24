@@ -58,6 +58,12 @@ const prog = {
 		stringMapKey: { color: 'brightGreen' } ,
 		stringMapValue: { color: 'brightBlue' } ,
 
+		sectionMark: { color: 'brightWhite' , bold: true } ,
+		sectionKey: { color: 'brightGreen' , bold: true } ,
+
+		includeMark: { color: 'brightMagenta' , bold: true } ,
+		includePath: { color: 'magenta' } ,
+
 		constantKeyword: { color: 'brightBlue' , bold: true } ,
 
 		kfgOperatorMark: { color: 'brightRed' } ,
@@ -274,7 +280,7 @@ const prog = {
 
 		item: {
 			action: [ 'style' , 'operator' ] ,
-			span: 'itemMark' ,
+			span: 'operator' ,
 			branches: [
 				{
 					match: '\n' ,
@@ -303,11 +309,11 @@ const prog = {
 		} ,
 		itemRepetition: {
 			action: [ 'style' , 'repetition' ] ,
-			span: 'itemMark' ,
+			span: 'operator' ,
 			branches: [
 				{
 					match: '\n' ,
-					action: [ 'spanStyle' , 'itemMark' , 'parseError' ] ,
+					action: [ 'spanStyle' , 'operator' , 'parseError' ] ,
 					state: 'idle'
 				} ,
 				{
@@ -974,10 +980,151 @@ const prog = {
 
 
 
+		maybeSection: {
+			action: [ 'style' , 'parseError' ] ,
+			span: 'operator' ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'operator' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: '-' ,
+					action: [ 'spanStyle' , 'operator' , 'sectionMark' ] ,
+					copySpan: [ 'operator' , 'section' ] ,
+					state: 'section'
+				} ,
+				{
+					action: [ 'spanStyle' , 'operator' , 'parseError' ] ,
+					state: 'lineError'
+				}
+			]
+		} ,
+		section: {
+			action: [ 'style' , 'sectionMark' ] ,
+			span: 'section' ,
+			branches: [
+				{
+					// This is a section element
+					match: '\n' ,
+					state: 'idle'
+				} ,
+				{
+					match: '-' ,
+					state: 'section'
+				} ,
+				{
+					state: 'sectionKey'
+				}
+			]
+		} ,
+		sectionKey: {
+			action: [ 'style' , 'sectionKey' ] ,
+			span: [ 'section' , 'sectionKey' ] ,
+			branches: [
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'section' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: '-' ,
+					state: 'maybeSectionEnd'
+				} ,
+				{
+					state: 'sectionKey'
+				}
+			]
+		} ,
+		maybeSectionEnd: {
+			span: [ 'section' , 'sectionEndMark' ] ,
+			branches: [
+				{
+					match: '-' ,
+					state: 'maybeSectionEnd'
+				} ,
+				{
+					match: '\n' ,
+					action: [ 'spanStyle' , 'sectionEndMark' , 'parseError' ] ,
+					state: 'idle' ,
+					
+					branchOn: 'sectionEndMark' ,
+					spanBranches: [
+						{
+							match: /^-{3,}$/ ,
+							action: [ 'spanStyle' , 'sectionEndMark' , 'sectionMark' ] ,
+							state: 'idle'
+						}
+					]
+				} ,
+				{
+					expandSpan: 'sectionKey' ,
+					action: [ 'spanStyle' , 'sectionKey' , 'sectionKey' ] ,
+					state: 'sectionKey'
+				}
+			]
+		} ,
+		
+		
+		
+		includeMark: {
+			action: [ 'style' , 'includeMark' ] ,
+			span: 'includeMark' ,
+			branches: [
+				{
+					// This is a section element
+					match: '\n' ,
+					action: [ 'spanStyle' , 'includeMark' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: '@' ,
+					state: 'mandatoryIncludeMark'
+				} ,
+				{
+					state: 'includePath'
+				}
+			]
+		} ,
+		mandatoryIncludeMark: {
+			action: [ 'style' , 'includeMark' ] ,
+			span: 'includeMark' ,
+			branches: [
+				{
+					// This is a section element
+					match: '\n' ,
+					action: [ 'spanStyle' , 'includeMark' , 'parseError' ] ,
+					state: 'idle'
+				} ,
+				{
+					match: '@' ,
+					action: [ 'spanStyle' , 'includeMark' , 'parseError' ] ,
+					state: 'lineError'
+				} ,
+				{
+					state: 'includePath'
+				}
+			]
+		} ,
+		includePath: {
+			action: [ 'style' , 'includePath' ] ,
+			//span: 'includePath' ,
+			branches: [
+				{
+					// This is a section element
+					match: '\n' ,
+					state: 'idle'
+				}
+			]
+		} ,
+		
+		
+		
 		/*
 			MISSING from JOE state-machine:
 
-			*section* *tag* *include* *ref* *expression*
+			*tag* *ref* *expression*
 			*template* *introduced*template* *doublequote*key* *doublequote*string* *doublequote*template*
 			hexadecimal numbers
 			
