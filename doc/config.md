@@ -76,6 +76,11 @@ MAYBE:
 * delay: `boolean` if set, the action of the state before branching will be used this time, instead of those of the new state.
 * transition: `boolean` like delay the new state's actions are not applied, but neither are the former state's actions, only the branch's actions are applied.
   This property is useful to avoid creating a state that will immediately change to another.
+* checkpoint: `boolean` if set, we have found a potential checkpoint.
+  A *checkpoint* is supposed to be a stable point that have greater chance of resisting from modification made around it.
+  Typically in most programming language, the end of a *statement* can be such point.
+  The host program should manage checkpoints by itself: `.pushEvent()` will return true when a checkpoint is encountered, and the program
+  could use `.saveState()`, `.restoreState()` and `.isStateEqualTo()` for that task.
 
 MAYBE:
 * overide: `boolean` if set, the branch's action replace the next state's action once.

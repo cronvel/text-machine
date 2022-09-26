@@ -214,6 +214,14 @@ const prog = {
 				{
 					match: ':' ,
 					state: 'colon' ,
+				} ,
+				{
+					match: ';' ,
+					state: 'maybeAfterStatement'
+				} ,
+				{
+					match: '\n' ,
+					state: 'maybeAfterStatement'
 				}
 			]
 		} ,
@@ -231,11 +239,50 @@ const prog = {
 					state: 'idleAfterValue'
 				} ,
 				{
+					match: ';' ,
+					state: 'afterValueMaybeAfterStatement'
+				} ,
+				{
+					match: '\n' ,
+					state: 'afterValueMaybeAfterStatement'
+				} ,
+				{
 					state: 'idle' ,
 					propagate: true
 				}
 			]
 		} ,
+		
+		// Those stats are only used for defining checkpoint
+		maybeAfterStatement: {
+			branches: [
+				{
+					match: /[ \t\n;]/ ,
+					state: 'maybeAfterStatement'
+				} ,
+				{
+					state: 'idle' ,
+					propagate: true ,
+					checkpoint: true
+				}
+			]
+		} ,
+		afterValueMaybeAfterStatement: {
+			branches: [
+				{
+					match: /[ \t\n;]/ ,
+					state: 'afterValueMaybeAfterStatement'
+				} ,
+				{
+					state: 'idleAfterValue' ,
+					propagate: true ,
+					checkpoint: true
+				}
+			]
+		} ,
+
+
+
 		number: {
 			action: [ 'style' , 'number' ] ,
 			branches: [
